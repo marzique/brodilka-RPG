@@ -133,7 +133,7 @@ class Main():
         pygame.display.flip()
 
 
-    def render_ammo(self):
+    def render_ammo(self):                              # replace to player class!!
         if 10 - self.player.hand_shots >= 0:
             self.add_text("Ammo left: " + str(10 - self.player.hand_shots), WIDTH * 0.8, HEIGHT - HEIGHT * 0.95, FONT1, 20, WHITE)
         else:
