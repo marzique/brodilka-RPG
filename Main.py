@@ -1,4 +1,4 @@
-import random, time, math, pygame
+import random
 
 import sys
 from Projectives import *
@@ -7,13 +7,13 @@ from Constants import *
 from Player import *
 from pygame.locals import *
 
-class Main():
+class Main:
 
     def __init__(self,screen):
         self.screen = screen
         self.running = True
         self.background = pygame.image.load(BACKGROUND)
-        self.projective_objects = []           # снаряды
+        self.projective_objects = []                                        # снаряды
         self.player = Player(PLAYER_NAME)
         # self.mob = Mob('MAGE')
         self.main_loop()
@@ -22,18 +22,18 @@ class Main():
         for event in pygame.event.get():
             if event.type == QUIT:
                 self.running = False
-                                                                            # replace all events as methods to their classes
-                                                                            # (e.g. moving,shot... -> player,..)
+                                                                    # replace all events as methods to their classes
+                                                                    # (e.g. moving,shot... -> player,..)
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()                          # gets mouse position
 
-                                                                            # checks if mouse position is over the button
-                                                                            # note this method is constantly looking for collisions
-                                                                            # the only reason you dont see an evet activated when you
-                                                                            # hover over the button is because the method is bellow the
-                                                                            # mousedown event if it were outside it would be called the
-                                                                            # the moment the mouse hovers over the button
+                                                            # checks if mouse position is over the button
+                                                            # note this method is constantly looking for collisions
+                                                            # the only reason you dont see an evet activated when you
+                                                            # hover over the button is because the method is bellow the
+                                                            # mousedown event if it were outside it would be called the
+                                                            # the moment the mouse hovers over the button
 
                 if button.collidepoint(mouse_pos):
                     # pritns current location of mouse
@@ -82,60 +82,77 @@ class Main():
             if self.player.hand_shots < BULLETS_CD and self.player.status == ALIVE:
                 if self.player.dir == CHAR_D:
                     if self.player.hand == 0:
-                        self.projective_objects.append(Bullet(self.player.x + 160 * scale, self.player.y + 260 * scale, self.player.dir))
+                        self.projective_objects.append(Bullet(self.player.x + 160 * scale,
+                                                              self.player.y + 260 * scale,
+                                                              self.player.dir))
                         self.player.hand = 1
                         self.player.hand_shots += 1
                     elif self.player.hand == 1:
-                        self.projective_objects.append(Bullet(self.player.x + 50 * scale, self.player.y + 260 * scale, self.player.dir))
+                        self.projective_objects.append(Bullet(self.player.x + 50 * scale,
+                                                              self.player.y + 260 * scale,
+                                                              self.player.dir))
                         self.player.hand = 0
                         self.player.hand_shots += 1
 
                 if self.player.dir == CHAR_U:
                     if self.player.hand == 0:
-                        self.projective_objects.append(Bullet(self.player.x + 150 * scale, self.player.y + 50 * scale, self.player.dir))
+                        self.projective_objects.append(Bullet(self.player.x + 150 * scale,
+                                                              self.player.y + 50 * scale,
+                                                              self.player.dir))
                         self.player.hand = 1
                         self.player.hand_shots += 1
                     elif self.player.hand == 1:
-                        self.projective_objects.append(Bullet(self.player.x + 40 * scale, self.player.y + 50 * scale, self.player.dir))
+                        self.projective_objects.append(Bullet(self.player.x + 40 * scale,
+                                                              self.player.y + 50 * scale,
+                                                              self.player.dir))
                         self.player.hand = 0
                         self.player.hand_shots += 1
 
                 if self.player.dir == CHAR_R:
                     if self.player.hand == 0:
-                        self.projective_objects.append(Bullet(self.player.x + 200 * scale, self.player.y + 130 * scale, self.player.dir))
+                        self.projective_objects.append(Bullet(self.player.x + 200 * scale,
+                                                              self.player.y + 130 * scale,
+                                                              self.player.dir))
                         self.player.hand = 1
                         self.player.hand_shots += 1
                     elif self.player.hand == 1:
-                        self.projective_objects.append(Bullet(self.player.x + 200 * scale, self.player.y + 170 * scale, self.player.dir))
+                        self.projective_objects.append(Bullet(self.player.x + 200 * scale,
+                                                              self.player.y + 170 * scale,
+                                                              self.player.dir))
                         self.player.hand = 0
                         self.player.hand_shots += 1
 
                 if self.player.dir == CHAR_L:
                     if self.player.hand == 0:
-                        self.projective_objects.append(Bullet(self.player.x + 10 * scale, self.player.y + 130 * scale, self.player.dir))
+                        self.projective_objects.append(Bullet(self.player.x + 10 * scale,
+                                                              self.player.y + 130 * scale,
+                                                              self.player.dir))
                         self.player.hand = 1
                         self.player.hand_shots += 1
                     elif self.player.hand == 1:
-                        self.projective_objects.append(Bullet(self.player.x + 10 * scale, self.player.y + 170 * scale, self.player.dir))
+                        self.projective_objects.append(Bullet(self.player.x + 10 * scale,
+                                                              self.player.y + 170 * scale,
+                                                              self.player.dir))
                         self.player.hand = 0
                         self.player.hand_shots += 1
                 self.player.mp -= SHOT_MP
 
     def render(self):
-        self.screen.blit(self.background, (0,0))
+        self.screen.blit(self.background, (0, 0))
         self.player.render(screen)
         # self.mob.render(screen)
         self.player.render_ui(screen)
+        self.add_button()
         for i in self.projective_objects:
             i.render(screen)
         self.render_ammo()
-        pygame.draw.rect(screen, [255, 0, 0], button, 10)
         pygame.display.flip()
 
-
-    def render_ammo(self):                              # r eplace to player class!!
+        # replace to player class!!
+    def render_ammo(self):
         if 10 - self.player.hand_shots >= 0:
-            self.add_text("Ammo left: " + str(10 - self.player.hand_shots), WIDTH * 0.8, HEIGHT - HEIGHT * 0.95, FONT1, 20, WHITE)
+            self.add_text("Ammo left: " + str(10 - self.player.hand_shots),
+                          WIDTH * 0.8, HEIGHT - HEIGHT * 0.95, FONT1, 20, WHITE)
         else:
             self.add_text("Ammo left: " + '0', WIDTH * 0.8, HEIGHT - HEIGHT * 0.95, FONT1, 20, RED)
             self.add_text("RELOADING...", WIDTH * 0.8, HEIGHT - HEIGHT * 0.92, FONT1, 20, RED)
@@ -156,7 +173,8 @@ class Main():
 
     def bullets_move(self):
         for i in self.projective_objects:
-            if i.x - i.start_x >= BULLET_DISTANCE or i.y - i.start_y >= BULLET_DISTANCE:  # удалить обьект после определенной дистанции
+            # удалить обьект после определенной дистанции
+            if i.x - i.start_x >= BULLET_DISTANCE or i.y - i.start_y >= BULLET_DISTANCE:
                 self.projective_objects.remove(i)
             else:
                 i.move()
@@ -172,9 +190,8 @@ class Main():
 
     #     render(text, antialias, color, background=None) -> Surface
 
-    def add_button(self, ):
-        pass
-
+    def add_button(self):
+        pygame.draw.rect(screen, [0, 255, 0], button, 5)
 
     def main_loop(self):
         while self.running == True:
@@ -189,10 +206,8 @@ class Main():
             clock.tick(FPS)
 
 pygame.init()
-screen = pygame.display.set_mode((WIDTH,HEIGHT), HWSURFACE | DOUBLEBUF)
+screen = pygame.display.set_mode((WIDTH, HEIGHT), HWSURFACE | DOUBLEBUF)
 pygame.display.set_caption(WINDOW_NAME)
-button = pygame.Rect(500, 500, 50, 50)  # creates a rect object
 clock = pygame.time.Clock()
-
 
 game = Main(screen)

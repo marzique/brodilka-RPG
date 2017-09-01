@@ -1,7 +1,8 @@
 import pygame
 from Constants import *
 from Projectives import *
-
+from Playergui import Interface
+# from Main import button
 
 
 class Character:
@@ -20,6 +21,9 @@ class Character:
         self.hand = 1  # right or left hand shoots
         self.hand_shots = 0  # shoots after cooldown
         self.cd = 0  # cooldown time var (msec)
+        self.moving = [0, 0, 0, 0]
+        self.inteface = Interface()
+        self.collides = False
 
         # отрисовка игрока
         temp = pygame.image.load(PLAYERPACK).convert_alpha()
@@ -47,7 +51,7 @@ class Character:
             height = self.subcorpse[i].get_height()
             self.subcorpse[i] = pygame.transform.scale(self.subcorpse[i], (int(width * scale), int(height * scale)))
 
-        self.moving = [0, 0, 0, 0]
+
 
     def move(self):
         if self.status == ALIVE:
@@ -118,6 +122,7 @@ class Player(Character):
         self.hand = 1           # right or left hand shoots
         self.hand_shots = 0     # shoots after cooldown
         self.cd = 0             # cooldown time var (msec)
+        self.player_rect = pygame.Rect(self.x, self.y, 250, 250)
 
         # отрисовка игрока
         temp = pygame.image.load(PLAYERPACK).convert_alpha()
@@ -171,12 +176,14 @@ class Player(Character):
             if self.y >= HEIGHT - DOWN_GAP:
                 self.y = HEIGHT - DOWN_GAP
 
+
     # прорисовка игрока
     def render(self,screen):
         if self.status == ALIVE:
             screen.blit(self.subimages[self.dir], (self.x,self.y))
         else:
             screen.blit(self.subcorpse[self.dir], (self.x,self.y))
+
 
     # прорисовка интерфейса
     def render_ui(self, screen):
@@ -195,7 +202,11 @@ class Player(Character):
             if self.gold < 100:
                 self.gold += GOLD_REGEN
 
-        # print(str(self.hp) + ' ' + str(self.mp) + ' ' + str(self.gold))
+
+    def handle_collisions(self, rectangle):
+        self.player_rect = pygame.Rect(self.x, self.y, 250, 250)
+        return self.player_rect.colliderect(rectangle)
+        # self.collides = True
 
 class Mob(Character):
 
@@ -261,6 +272,4 @@ class Mob(Character):
             if self.gold < 100:
                 self.gold += GOLD_REGEN
 
-    # TODO
-    def handle_collisions(self):
-        pass
+button = pygame.Rect(500, 500, 50, 50)  # creates a rect object
