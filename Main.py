@@ -77,7 +77,7 @@ class Main:
                     self.player.moving[CHAR_D] = 0
 
     def shoot(self):
-        # добавление обькта пули              желательно переместить этот метод в класс Player!! (player. -> del)
+        # добавление обькта пули              желательно переместить этот метод в класс Player!! (player. ->  del)
         if self.player.mp >= SHOT_MP:
             if self.player.hand_shots < BULLETS_CD and self.player.status == ALIVE:
                 if self.player.dir == CHAR_D:
