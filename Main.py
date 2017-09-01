@@ -22,16 +22,18 @@ class Main():
         for event in pygame.event.get():
             if event.type == QUIT:
                 self.running = False
+                                                                            # replace all events as methods to their classes
+                                                                            # (e.g. moving,shot... -> player,..)
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()  # gets mouse position
+                mouse_pos = pygame.mouse.get_pos()                          # gets mouse position
 
-                # checks if mouse position is over the button
-                # note this method is constantly looking for collisions
-                # the only reason you dont see an evet activated when you
-                # hover over the button is because the method is bellow the
-                # mousedown event if it were outside it would be called the
-                # the moment the mouse hovers over the button
+                                                                            # checks if mouse position is over the button
+                                                                            # note this method is constantly looking for collisions
+                                                                            # the only reason you dont see an evet activated when you
+                                                                            # hover over the button is because the method is bellow the
+                                                                            # mousedown event if it were outside it would be called the
+                                                                            # the moment the mouse hovers over the button
 
                 if button.collidepoint(mouse_pos):
                     # pritns current location of mouse
