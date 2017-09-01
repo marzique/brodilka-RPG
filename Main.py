@@ -26,7 +26,7 @@ class Main():
                                                                             # (e.g. moving,shot... -> player,..)
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()                          # gets mouse position
+                mouse_pos = pygame.mouse.get_pos()                          # f gets mouse position
 
                                                                             # checks if mouse position is over the button
                                                                             # note this method is constantly looking for collisions
