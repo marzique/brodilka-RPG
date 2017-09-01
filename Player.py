@@ -260,3 +260,7 @@ class Mob(Character):
                 self.mp += MP_REGEN
             if self.gold < 100:
                 self.gold += GOLD_REGEN
+
+    # TODO
+    def handle_collisions(self):
+        pass
