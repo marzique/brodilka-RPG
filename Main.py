@@ -18,7 +18,7 @@ class Main:
         # self.mob = Mob('MAGE')
         self.main_loop()
 
-    def events(self):
+    def events(self):                       #TODO create events class, and replace these there
         for event in pygame.event.get():
             if event.type == QUIT:
                 self.running = False
@@ -89,7 +89,7 @@ class Main:
         pygame.display.flip()
 
         # replace to player class!!
-    def render_ammo(self):
+    def render_ammo(self):          #TODO replace to playergui class
         if 10 - self.player.hand_shots >= 0:
             self.add_text("Ammo left: " + str(10 - self.player.hand_shots),
                           WIDTH * 0.6, HEIGHT - HEIGHT * 0.95, FONT1, 20, WHITE)
@@ -97,7 +97,7 @@ class Main:
             self.add_text("Ammo left: " + '0', WIDTH * 0.6, HEIGHT - HEIGHT * 0.95, FONT1, 20, RED)
             self.add_text("RELOADING...", WIDTH * 0.6, HEIGHT - HEIGHT * 0.92, FONT1, 20, RED)
 
-    def cooldown(self):
+    def cooldown(self):             #TODO replace to player class
         # задержка в мс
         if self.player.hand_shots == BULLETS_CD:
             self.player.cd = pygame.time.get_ticks()
@@ -106,12 +106,12 @@ class Main:
             if pygame.time.get_ticks() - self.player.cd >= TIME_CD:
                 self.player.hand_shots = 0
 
-    def reload(self):
+    def reload(self):               #TODO replace to player class
         self.player.cd = pygame.time.get_ticks()
         if pygame.time.get_ticks() - self.player.cd >= TIME_CD:
             self.player.hand_shots = 0
 
-    def bullets_move(self):
+    def bullets_move(self):         #TODO replace to player class
         for i in self.player.projective_objects:
             # удалить обьект после определенной дистанции
             if i.x - i.start_x >= BULLET_DISTANCE or i.y - i.start_y >= BULLET_DISTANCE:
