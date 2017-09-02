@@ -119,9 +119,10 @@ class Player(Character):
         self.corpsepack = CORPSEPACK
         self.subimages = []
         self.subcorpse = []
-        self.hand = 1           # right or left hand shoots
-        self.hand_shots = 0     # shoots after cooldown
-        self.cd = 0             # cooldown time var (msec)
+        self.projective_objects = []        # bullets
+        self.hand = 1                       # right or left hand shoots
+        self.hand_shots = 0                 # shoots after cooldown
+        self.cd = 0                         # cooldown time var (msec)
         self.player_rect = pygame.Rect(self.x, self.y, 250, 250)
 
         # отрисовка игрока
@@ -176,6 +177,66 @@ class Player(Character):
             if self.y >= HEIGHT - DOWN_GAP:
                 self.y = HEIGHT - DOWN_GAP
 
+    def shoot(self):
+        # добавление обькта пули
+        if self.mp >= SHOT_MP:
+            if self.hand_shots < BULLETS_CD and self.status == ALIVE:
+                if self.dir == CHAR_D:
+                    if self.hand == 0:
+                        self.projective_objects.append(Bullet(self.x + 160 * scale,
+                                                              self.y + 260 * scale,
+                                                              self.dir))
+                        self.hand = 1
+                        self.hand_shots += 1
+                    elif self.hand == 1:
+                        self.projective_objects.append(Bullet(self.x + 50 * scale,
+                                                              self.y + 260 * scale,
+                                                              self.dir))
+                        self.hand = 0
+                        self.hand_shots += 1
+
+                if self.dir == CHAR_U:
+                    if self.hand == 0:
+                        self.projective_objects.append(Bullet(self.x + 150 * scale,
+                                                              self.y + 50 * scale,
+                                                              self.dir))
+                        self.hand = 1
+                        self.hand_shots += 1
+                    elif self.hand == 1:
+                        self.projective_objects.append(Bullet(self.x + 40 * scale,
+                                                              self.y + 50 * scale,
+                                                              self.dir))
+                        self.hand = 0
+                        self.hand_shots += 1
+
+                if self.dir == CHAR_R:
+                    if self.hand == 0:
+                        self.projective_objects.append(Bullet(self.x + 200 * scale,
+                                                              self.y + 130 * scale,
+                                                              self.dir))
+                        self.hand = 1
+                        self.hand_shots += 1
+                    elif self.hand == 1:
+                        self.projective_objects.append(Bullet(self.x + 200 * scale,
+                                                              self.y + 170 * scale,
+                                                              self.dir))
+                        self.hand = 0
+                        self.hand_shots += 1
+
+                if self.dir == CHAR_L:
+                    if self.hand == 0:
+                        self.projective_objects.append(Bullet(self.x + 10 * scale,
+                                                              self.y + 130 * scale,
+                                                              self.dir))
+                        self.hand = 1
+                        self.hand_shots += 1
+                    elif self.hand == 1:
+                        self.projective_objects.append(Bullet(self.x + 10 * scale,
+                                                              self.y + 170 * scale,
+                                                              self.dir))
+                        self.hand = 0
+                        self.hand_shots += 1
+                self.mp -= SHOT_MP
 
     # прорисовка игрока
     def render(self,screen):

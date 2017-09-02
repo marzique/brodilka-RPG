@@ -13,7 +13,7 @@ class Main:
         self.screen = screen
         self.running = True
         self.background = pygame.image.load(BACKGROUND)
-        self.projective_objects = []                                        # снаряды
+        # self.projective_objects = []                                        # снаряды
         self.player = Player(PLAYER_NAME)
         # self.mob = Mob('MAGE')
         self.main_loop()
@@ -64,7 +64,7 @@ class Main:
 
                         # СТРЕЛЬБА С ДВУХ СТВОЛОВ
                 if event.key == K_z:
-                    self.shoot()
+                    self.player.shoot()
                                                         # отжатие клавиш
             elif event.type == KEYUP:
                 if event.key == K_RIGHT:
@@ -76,66 +76,6 @@ class Main:
                 if event.key == K_DOWN:
                     self.player.moving[CHAR_D] = 0
 
-    def shoot(self):
-        # добавление обькта пули              желательно переместить этот метод в класс Player!! (player. -> del)
-        if self.player.mp >= SHOT_MP:
-            if self.player.hand_shots < BULLETS_CD and self.player.status == ALIVE:
-                if self.player.dir == CHAR_D:
-                    if self.player.hand == 0:
-                        self.projective_objects.append(Bullet(self.player.x + 160 * scale,
-                                                              self.player.y + 260 * scale,
-                                                              self.player.dir))
-                        self.player.hand = 1
-                        self.player.hand_shots += 1
-                    elif self.player.hand == 1:
-                        self.projective_objects.append(Bullet(self.player.x + 50 * scale,
-                                                              self.player.y + 260 * scale,
-                                                              self.player.dir))
-                        self.player.hand = 0
-                        self.player.hand_shots += 1
-
-                if self.player.dir == CHAR_U:
-                    if self.player.hand == 0:
-                        self.projective_objects.append(Bullet(self.player.x + 150 * scale,
-                                                              self.player.y + 50 * scale,
-                                                              self.player.dir))
-                        self.player.hand = 1
-                        self.player.hand_shots += 1
-                    elif self.player.hand == 1:
-                        self.projective_objects.append(Bullet(self.player.x + 40 * scale,
-                                                              self.player.y + 50 * scale,
-                                                              self.player.dir))
-                        self.player.hand = 0
-                        self.player.hand_shots += 1
-
-                if self.player.dir == CHAR_R:
-                    if self.player.hand == 0:
-                        self.projective_objects.append(Bullet(self.player.x + 200 * scale,
-                                                              self.player.y + 130 * scale,
-                                                              self.player.dir))
-                        self.player.hand = 1
-                        self.player.hand_shots += 1
-                    elif self.player.hand == 1:
-                        self.projective_objects.append(Bullet(self.player.x + 200 * scale,
-                                                              self.player.y + 170 * scale,
-                                                              self.player.dir))
-                        self.player.hand = 0
-                        self.player.hand_shots += 1
-
-                if self.player.dir == CHAR_L:
-                    if self.player.hand == 0:
-                        self.projective_objects.append(Bullet(self.player.x + 10 * scale,
-                                                              self.player.y + 130 * scale,
-                                                              self.player.dir))
-                        self.player.hand = 1
-                        self.player.hand_shots += 1
-                    elif self.player.hand == 1:
-                        self.projective_objects.append(Bullet(self.player.x + 10 * scale,
-                                                              self.player.y + 170 * scale,
-                                                              self.player.dir))
-                        self.player.hand = 0
-                        self.player.hand_shots += 1
-                self.player.mp -= SHOT_MP
 
     def render(self):
         self.screen.blit(self.background, (0, 0))
@@ -143,7 +83,7 @@ class Main:
         # self.mob.render(screen)
         self.player.render_ui(screen)
         self.add_button()
-        for i in self.projective_objects:
+        for i in self.player.projective_objects:
             i.render(screen)
         self.render_ammo()
         pygame.display.flip()
@@ -152,10 +92,10 @@ class Main:
     def render_ammo(self):
         if 10 - self.player.hand_shots >= 0:
             self.add_text("Ammo left: " + str(10 - self.player.hand_shots),
-                          WIDTH * 0.8, HEIGHT - HEIGHT * 0.95, FONT1, 20, WHITE)
+                          WIDTH * 0.6, HEIGHT - HEIGHT * 0.95, FONT1, 20, WHITE)
         else:
-            self.add_text("Ammo left: " + '0', WIDTH * 0.8, HEIGHT - HEIGHT * 0.95, FONT1, 20, RED)
-            self.add_text("RELOADING...", WIDTH * 0.8, HEIGHT - HEIGHT * 0.92, FONT1, 20, RED)
+            self.add_text("Ammo left: " + '0', WIDTH * 0.6, HEIGHT - HEIGHT * 0.95, FONT1, 20, RED)
+            self.add_text("RELOADING...", WIDTH * 0.6, HEIGHT - HEIGHT * 0.92, FONT1, 20, RED)
 
     def cooldown(self):
         # задержка в мс
@@ -172,10 +112,10 @@ class Main:
             self.player.hand_shots = 0
 
     def bullets_move(self):
-        for i in self.projective_objects:
+        for i in self.player.projective_objects:
             # удалить обьект после определенной дистанции
             if i.x - i.start_x >= BULLET_DISTANCE or i.y - i.start_y >= BULLET_DISTANCE:
-                self.projective_objects.remove(i)
+                self.player.projective_objects.remove(i)
             else:
                 i.move()
 

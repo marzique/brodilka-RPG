@@ -1,8 +1,8 @@
 import os
 
 # window and graphic settings
-WIDTH = 1280
-HEIGHT = 720
+WIDTH = 800
+HEIGHT = 600
 FPS = 60
 
 scale = 0.5
