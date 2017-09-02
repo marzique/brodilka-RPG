@@ -5,7 +5,7 @@ WIDTH = 800
 HEIGHT = 600
 FPS = 60
 
-# player's image scaling (велосипед жоский)
+# player's image scaling  (велосипед жоский)
 scale = 0.5
 
 # images
