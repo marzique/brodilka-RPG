@@ -1,12 +1,10 @@
-import os
-
 # window and graphic settings
-WIDTH = 800
-HEIGHT = 600
+WIDTH = 1280
+HEIGHT = 720
 FPS = 60
 
 # player's image scaling  (велосипед жоский)
-scale = 0.5
+SCALE = 0.5
 
 # images
 BACKGROUND = 'data/tempground.jpg'
@@ -28,7 +26,7 @@ GOLEFT = [0, 1, 0, 0]
 GOUP = [0, 0, 1, 0]
 GODOWN = [0, 0, 0, 1]
 
-                # PLAYERS subPICTURE HITBOX
+# PLAYERS subPICTURE HITBOX
 LEFT_GAP = 20
 UP_GAP = 20
 RIGHT_GAP = 100
@@ -57,10 +55,9 @@ BULLETS_CD = 10
 # Mobs
 
 MOB_SPEED = 4
-START_X_MOB = START_X + 500 * scale
-START_Y_MOB = START_Y + 500 * scale
+START_X_MOB = START_X + 500 * SCALE
+START_Y_MOB = START_Y + 500 * SCALE
 # MAGE
-
 
 # Time parameters
 TIME_CD = 1500  # 1.5 ms
