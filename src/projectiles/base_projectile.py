@@ -1,9 +1,9 @@
 import pygame
 
-from . import constants
+from src import constants
 
 
-class BaseProjective:
+class BaseProjectile:
     SPEED = 0
     IMAGE_FILE = ''
 
@@ -25,15 +25,17 @@ class BaseProjective:
 
     def move(self):
         if self.direction == constants.CHAR_R:
-            self.x += self.SPEED
+            self.x += self.speed
         if self.direction == constants.CHAR_L:
-            self.x -= self.SPEED
+            self.x -= self.speed
         if self.direction == constants.CHAR_U:
-            self.y -= self.SPEED
+            self.y -= self.speed
         if self.direction == constants.CHAR_D:
-            self.y += self.SPEED
+            self.y += self.speed
 
-
-class Bullet(BaseProjective):
-    IMAGE_FILE = 'data/BULLETS.png'
-    SPEED = constants.BULLET_SPEED
+    def flew_away(self) -> bool:
+        if self.x - self.start_x >= constants.BULLET_DISTANCE:
+            return True
+        if self.y - self.start_y >= constants.BULLET_DISTANCE:
+            return True
+        return False
