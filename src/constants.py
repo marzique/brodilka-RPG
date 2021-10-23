@@ -1,7 +1,12 @@
+import os
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
 # window and graphic settings
-WIDTH = 1280
-HEIGHT = 720
-FPS = 60
+WIDTH = int(os.getenv('WIDTH', 1280))
+HEIGHT = int(os.getenv('HEIGHT', 720))
 
 # player's image scaling  (велосипед жоский)
 SCALE = 0.5
@@ -12,7 +17,7 @@ PLAYERPACK = 'data/RLUD.png'
 CORPSEPACK = 'data/CORPSE.png'
 
 # titles
-WINDOW_NAME = 'SHITTY GAME'
+WINDOW_NAME = 'RPG OPEN WORLD!'
 PLAYER_NAME = 'marz420'
 
 # player movement and position binds
@@ -44,8 +49,8 @@ GOLD = 200
 GOLD_REGEN = 1
 SHOT_MP = 5
 
-PLAYER_SPEED = 5
-BULLET_SPEED = 12
+PLAYER_SPEED = 2
+BULLET_SPEED = 16
 BULLET_DISTANCE = 1000
 BULLETS_CD = 10
 

@@ -4,6 +4,7 @@ import pygame
 
 from src import constants
 from src.playergui import Interface
+from src.utils import add_text
 
 
 class AbstractCharacter(ABC):
@@ -38,7 +39,7 @@ class BaseCharacter(AbstractCharacter):
     @property
     def rect(self):
         # TODO: 250 ??
-        return pygame.Rect(self.x, self.y, 250, 250)
+        return pygame.Rect(self.x, self.y, 110, 110)
 
     @staticmethod
     def load_player_sprites():
@@ -77,21 +78,26 @@ class BaseCharacter(AbstractCharacter):
 
         return playerpack_list, corpsepack_list
 
+    def process_input(self, event):
+        pass
+
     def update(self):
         self.regen()
         self.move()
-        self.projectile_move()
+        self.projectiles_move()
         self.cooldown()
 
     def render(self, screen):
+        for projectile in self.projectile_objects:
+            projectile.render(screen)
+
         if self.alive:
             sub_dict = self.playerpack_list
         else:
             sub_dict = self.corpsepack_list
         screen.blit(sub_dict[self.direction], (self.x, self.y))
         self.render_ui(screen)
-        for projectile in self.projectile_objects:
-            projectile.render(screen)
+        self.render_ammo(screen)
 
     def cooldown(self):
         if self.hand_shots == constants.BULLETS_CD:
@@ -101,6 +107,16 @@ class BaseCharacter(AbstractCharacter):
             if pygame.time.get_ticks() - self.cooldown_time >= constants.TIME_CD:
                 self.hand_shots = 0
 
+    def render_ammo(self, screen):
+        if 10 - self.hand_shots >= 0:
+            add_text(screen, "Ammo left: " + str(10 - self.hand_shots), constants.WIDTH * 0.6,
+                     constants.HEIGHT - constants.HEIGHT * 0.95, constants.FONT1, 20, constants.WHITE)
+        else:
+            add_text(screen, "Ammo left: " + '0', constants.WIDTH * 0.6,
+                     constants.HEIGHT - constants.HEIGHT * 0.95, constants.FONT1, 20, constants.RED)
+            add_text(screen, "RELOADING...", constants.WIDTH * 0.6,
+                     constants.HEIGHT - constants.HEIGHT * 0.92, constants.FONT1, 20, constants.RED)
+
     def render_ui(self, screen):
         if self.alive:
             pygame.draw.line(screen, constants.RED, (self.x + 10, self.y), (self.x + self.hp + 10, self.y),
@@ -108,7 +124,7 @@ class BaseCharacter(AbstractCharacter):
             pygame.draw.line(screen, constants.BLUE, (self.x + 10, self.y + constants.HPMP_THICKNESS),
                              (self.x + self.mp + 10, self.y + constants.HPMP_THICKNESS), constants.HPMP_THICKNESS)
 
-    def projectile_move(self):
+    def projectiles_move(self):
         for projectile in self.projectile_objects:
             if projectile.x - projectile.start_x >= constants.BULLET_DISTANCE or projectile.y - projectile.start_y >= constants.BULLET_DISTANCE:
                 self.projectile_objects.remove(projectile)
@@ -130,7 +146,7 @@ class BaseCharacter(AbstractCharacter):
                 self.direction = constants.CHAR_D
                 self.y += constants.PLAYER_SPEED
 
-                # столкновение со стенками окна
+            # TODO: proper collision detection
             if self.x <= -constants.LEFT_GAP:
                 self.x = -constants.LEFT_GAP
             if self.y <= -constants.UP_GAP:

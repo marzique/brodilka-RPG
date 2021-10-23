@@ -1,10 +1,50 @@
+import pygame
+
 from src import constants
 from src.characters.base_character import BaseCharacter
 from src.projectiles import Bullet
 
 
 class Player(BaseCharacter):
+    def process_input(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            self.shoot()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_z:
+                if self.alive:
+                    self.kill()
+                else:
+                    self.resurrect()
+        self._process_wasd(event)
+
+    def _process_wasd(self, event):
+        """
+           [W]
+        [A][S][D] : Keys handler
+        """
+        if event.type == pygame.KEYDOWN:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_d]:
+                self.moving[0] = 1
+            if keys[pygame.K_a]:
+                self.moving[1] = 1
+            if keys[pygame.K_w]:
+                self.moving[2] = 1
+            if keys[pygame.K_s]:
+                self.moving[3] = 1
+
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_d:
+                self.moving[constants.CHAR_R] = 0
+            if event.key == pygame.K_a:
+                self.moving[constants.CHAR_L] = 0
+            if event.key == pygame.K_w:
+                self.moving[constants.CHAR_U] = 0
+            if event.key == pygame.K_s:
+                self.moving[constants.CHAR_D] = 0
+
     def shoot(self):
+        # TODO: refactor this mess
         if self.mp >= constants.SHOT_MP:
             if self.hand_shots < constants.BULLETS_CD and self.alive:
 
