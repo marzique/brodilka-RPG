@@ -7,20 +7,14 @@ from .import constants
 from .states import get_state
 
 
-button = pygame.Rect(500, 500, 50, 50)
-
-
 class Control:
     """Main class of the game that implements game loop pattern."""
     def __init__(self):
-        self.screen = pygame.display.set_mode((constants.WIDTH, constants.HEIGHT), HWSURFACE | DOUBLEBUF)
+        self.screen = pygame.display.set_mode((constants.WIDTH, constants.HEIGHT), pygame.SCALED | HWSURFACE | DOUBLEBUF)
         self.running = True
-        self.background = pygame.image.load(constants.BACKGROUND)
         self.fps = 144
         self.clock = pygame.time.Clock()
         self.state = get_state('Dungeon')
-        pygame.init()
-        pygame.display.set_caption(constants.WINDOW_NAME)
 
     def main_loop(self):
         """
@@ -49,10 +43,5 @@ class Control:
         self.state.update()
 
     def render(self):
-        self.screen.blit(self.background, (0, 0))
         self.state.render(self.screen)
-        self.render_button()
         pygame.display.update()
-
-    def render_button(self):
-        pygame.draw.rect(self.screen, [173, 100, 170], button, 5)

@@ -2,43 +2,33 @@ import os
 from dotenv import load_dotenv
 
 
+##################################################### GAME OPTIONS ####################################################
+# can be changed via .env file
 load_dotenv()
-
-# window and graphic settings
 WIDTH = int(os.getenv('WIDTH', 1280))
 HEIGHT = int(os.getenv('HEIGHT', 720))
+DEBUG = os.getenv('DEBUG', '').lower() == 'true'
+#######################################################################################################################
+
+TILE_SIZE_PX = 32
 
 # player's image scaling  (велосипед жоский)
 SCALE = 0.5
+CHARACTER_HEIGHT = 170
+CHARACTER_WIDTH = 100
+
+PLAYER_HEIGHT = 170
+PLAYER_WIDTH = 100
 
 # images
-BACKGROUND = 'data/tempground.jpg'
 PLAYERPACK = 'data/RLUD.png'
 CORPSEPACK = 'data/CORPSE.png'
 
 # titles
 WINDOW_NAME = 'RPG OPEN WORLD!'
-PLAYER_NAME = 'marz420'
 
 # player movement and position binds
-CHAR_R = 0  #1
-CHAR_L = 1  #2
-CHAR_U = 2  #3
-CHAR_D = 3  #4
-
-GORIGHT = [1, 0, 0, 0]
-GOLEFT = [0, 1, 0, 0]
-GOUP = [0, 0, 1, 0]
-GODOWN = [0, 0, 0, 1]
-
-# PLAYERS subPICTURE HITBOX
-LEFT_GAP = 20
-UP_GAP = 20
-RIGHT_GAP = 100
-DOWN_GAP = 140
-
-START_X = 50
-START_Y = 50
+CHAR_D, CHAR_U, CHAR_R, CHAR_L = (0, 1, 2, 3)
 
 # Player characteristics
 HP_MAX = 100
@@ -49,7 +39,7 @@ GOLD = 200
 GOLD_REGEN = 1
 SHOT_MP = 5
 
-PLAYER_SPEED = 2
+PLAYER_SPEED = 1
 BULLET_SPEED = 16
 BULLET_DISTANCE = 1000
 BULLETS_CD = 10
@@ -62,7 +52,7 @@ FONT1 = 'data/fonts/hachicro.ttf'
 FONT2 = 'data/fonts/Fipps-Regular.otf'
 
 # GUI
-HPMP_THICKNESS = 3
+HPMP_THICKNESS = 10
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)

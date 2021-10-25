@@ -42,16 +42,21 @@ class BaseState(AbstractState):
         self.previous_music = None
 
     def process_input(self, event):
-        print(f'{type(self).__name__} performed process_input')
+        # print(f'{type(self).__name__} performed process_input')
+        pass
 
     def update(self):
-        print(f'{type(self).__name__} performed update')
+        # print(f'{type(self).__name__} performed update')
+        pass
 
     def render(self, screen):
-        print(f'{type(self).__name__} performed render')
+        # print(f'{type(self).__name__} performed render')
+        pass
 
     def startup(self):
-        print(f'{type(self).__name__} performed startup')
+        # print(f'{type(self).__name__} performed startup')
+        pass
 
     def cleanup(self):
-        print(f'{type(self).__name__} performed cleanup')
+        # print(f'{type(self).__name__} performed cleanup')
+        pass
