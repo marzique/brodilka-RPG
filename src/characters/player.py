@@ -1,3 +1,5 @@
+import math
+
 import pygame
 
 from src import constants
@@ -14,6 +16,8 @@ class Player(BaseCharacter):
         self.cooldown_time = 0  # msec
         self.interface = GUI(self)
         self.size = (constants.PLAYER_HEIGHT, constants.PLAYER_WIDTH)
+        self.accel_x = 0
+        self.accel_y = 0
 
     def process_input(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -84,20 +88,39 @@ class Player(BaseCharacter):
                 self.mp += constants.MP_REGEN
 
     def move(self):
+        accel_step = 0.1
         if self.can_move:
-            # TODO: modify x, y to make collisions
+            self.apply_acceleration()
             if self.moving[constants.CHAR_R] == 1:
                 self.direction = constants.CHAR_R
-                self.x += constants.PLAYER_SPEED
+                self.accel_x += accel_step
             if self.moving[constants.CHAR_L] == 1:
                 self.direction = constants.CHAR_L
-                self.x -= constants.PLAYER_SPEED
+                self.accel_x -= accel_step
             if self.moving[constants.CHAR_U] == 1:
                 self.direction = constants.CHAR_U
-                self.y -= constants.PLAYER_SPEED
+                self.accel_y -= accel_step
             if self.moving[constants.CHAR_D] == 1:
                 self.direction = constants.CHAR_D
-                self.y += constants.PLAYER_SPEED
+                self.accel_y += accel_step
+
+            print(self.accel_x, self.accel_y)
+
+            self.x += self.accel_x
+            self.y += self.accel_y
+
+    def apply_acceleration(self):
+        min_threshold = 0.001
+        accel_fade = 0.90
+        # smooth break
+        if not all([self.moving[constants.CHAR_R], self.moving[constants.CHAR_L]]):
+            self.accel_x *= accel_fade
+            if abs(self.accel_x) < min_threshold:
+                self.accel_x = 0
+        if not all([self.moving[constants.CHAR_U], self.moving[constants.CHAR_D]]):
+            self.accel_y *= accel_fade
+            if abs(self.accel_y) < min_threshold:
+                self.accel_y = 0
 
     def shoot(self):
         if self.mp >= constants.SHOT_MP:

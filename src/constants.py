@@ -14,8 +14,6 @@ TILE_SIZE_PX = 32
 
 # player's image scaling  (велосипед жоский)
 SCALE = 0.5
-CHARACTER_HEIGHT = 170
-CHARACTER_WIDTH = 100
 
 PLAYER_HEIGHT = 170
 PLAYER_WIDTH = 100

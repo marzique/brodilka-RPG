@@ -38,9 +38,9 @@ class GUI:
     def render_ammo(self, screen):
         if 10 - self.player.range_shots_limit >= 0:
             add_text(screen, "Ammo left: " + str(10 - self.player.range_shots_limit), constants.WIDTH * 0.6,
-                     constants.HEIGHT - constants.HEIGHT * 0.95, constants.FONT1, 20, constants.WHITE)
+                     constants.HEIGHT - constants.HEIGHT * 0.95, constants.FONT1, 10, constants.WHITE)
         else:
             add_text(screen, "Ammo left: " + '0', constants.WIDTH * 0.6,
-                     constants.HEIGHT - constants.HEIGHT * 0.95, constants.FONT1, 20, constants.RED)
+                     constants.HEIGHT - constants.HEIGHT * 0.95, constants.FONT1, 10, constants.RED)
             add_text(screen, "RELOADING...", constants.WIDTH * 0.6,
-                     constants.HEIGHT - constants.HEIGHT * 0.92, constants.FONT1, 20, constants.RED)
+                     constants.HEIGHT - constants.HEIGHT * 0.92, constants.FONT1, 10, constants.RED)

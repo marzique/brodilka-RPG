@@ -19,13 +19,9 @@ class BaseCharacter:
         self.projectile_objects = []
         self.charpack_list, self.corpsepack_list = self.load_character_sprites()
         self.image = None
+        self.rect = None
+        self.update_current_image()
         self.can_move = True
-        self.size = (constants.CHARACTER_HEIGHT, constants.CHARACTER_WIDTH)
-
-    @property
-    def rect(self):
-        height, width = self.size
-        return pygame.Rect(self.x, self.y, height, width)
 
     @staticmethod
     def load_character_sprites():
@@ -58,7 +54,7 @@ class BaseCharacter:
         print('Processing needed player input...')
 
     def update(self):
-        self.image = self.get_current_image()
+        self.update_current_image()
         self.move()
         self.projectiles_move()
 
@@ -70,12 +66,13 @@ class BaseCharacter:
         if constants.DEBUG:
             draw_outline(screen, self.image, coords)
 
-    def get_current_image(self):
+    def update_current_image(self):
         if self.alive:
             sub_dict = self.charpack_list
         else:
             sub_dict = self.corpsepack_list
-        return sub_dict[self.direction]
+        self.image = sub_dict[self.direction]
+        self.rect = self.image.get_rect()
 
     def projectiles_move(self):
         for projectile in self.projectile_objects:

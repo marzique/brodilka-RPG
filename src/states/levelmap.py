@@ -16,7 +16,7 @@ class LevelMap(BaseState):
         super().__init__()
         self.name = name
         self.tilemap = self.load_tilemap(name)
-        self.player = Player('Tester', coords=(50, 50))
+        self.player = Player('Tester', coords=(50, 150))
         self.colliding_objects = [self.player]
         self.mobs = self.generate_mobs()
 
