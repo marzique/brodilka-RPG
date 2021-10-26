@@ -2,9 +2,9 @@ import math
 
 import pygame
 
-from src import constants
 from src.characters.base_character import BaseCharacter
-from src.constants import TILE_SIZE_PX
+from src.constants import TILE_SIZE_PX, PLAYER_HEIGHT, PLAYER_WIDTH, DEBUG, CHAR_R, CHAR_L, CHAR_U, CHAR_D, \
+    BULLETS_CD, TIME_CD, HP_REGEN, MP_REGEN, SHOT_MP
 from src.gui import GUI
 from src.projectiles import Bullet
 
@@ -16,7 +16,7 @@ class Player(BaseCharacter):
         self.range_shots_limit = 0  # shoots after cooldown
         self.cooldown_time = 0  # msec
         self.interface = GUI(self)
-        self.size = (constants.PLAYER_HEIGHT, constants.PLAYER_WIDTH)
+        self.size = (PLAYER_HEIGHT, PLAYER_WIDTH)
         self.accel_x = 0
         self.accel_y = 0
         self.collided_rect_outline = None
@@ -38,13 +38,13 @@ class Player(BaseCharacter):
         self.move()
         self.projectiles_move()
         self.regen()
-        self.cooldown()
+        self._cooldown()
 
     def render(self, screen):
         super().render(screen)
         self.interface.render(screen)
         if self.current_tile.get('type') == 'blocker':
-            if constants.DEBUG:
+            if DEBUG:
                 pygame.draw.rect(screen, [255, 0, 0], self.collided_rect_outline, 1)
 
     def _process_wasd(self, event):
@@ -67,13 +67,13 @@ class Player(BaseCharacter):
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_d:
-                self.moving[constants.CHAR_R] = 0
+                self.moving[CHAR_R] = 0
             if event.key == pygame.K_a:
-                self.moving[constants.CHAR_L] = 0
+                self.moving[CHAR_L] = 0
             if event.key == pygame.K_w:
-                self.moving[constants.CHAR_U] = 0
+                self.moving[CHAR_U] = 0
             if event.key == pygame.K_s:
-                self.moving[constants.CHAR_D] = 0
+                self.moving[CHAR_D] = 0
 
     def handle_collissions(self, tilemap):
         self.tilemap = tilemap
@@ -99,22 +99,22 @@ class Player(BaseCharacter):
         center_y = self.y + tile_center
         collides = False
 
-        if self.moving[constants.CHAR_R] == 1:
+        if self.moving[CHAR_R] == 1:
             if center_x >= map_width:
                 self.x = map_width - tile_center
                 self.accel_x = 0
                 collides = True
-        if self.moving[constants.CHAR_L] == 1:
+        if self.moving[CHAR_L] == 1:
             if center_x <= 0:
                 self.x = 0 - tile_center
                 self.accel_x = 0
                 collides = True
-        if self.moving[constants.CHAR_U] == 1:
+        if self.moving[CHAR_U] == 1:
             if center_y <= 0:
                 self.y = 0 - tile_center
                 self.accel_y = 0
                 collides = True
-        if self.moving[constants.CHAR_D] == 1:
+        if self.moving[CHAR_D] == 1:
             if center_y >= map_height:
                 self.y = map_height - tile_center
                 self.accel_y = 0
@@ -123,34 +123,33 @@ class Player(BaseCharacter):
         # print(self.x, self.y)
         return collides
 
-    def cooldown(self):
-        if self.range_shots_limit == constants.BULLETS_CD:
+    def _cooldown(self):
+        if self.range_shots_limit == BULLETS_CD:
             self.cooldown_time = pygame.time.get_ticks()
             self.range_shots_limit += 1
-        elif self.range_shots_limit > constants.BULLETS_CD:
-            if pygame.time.get_ticks() - self.cooldown_time >= constants.TIME_CD:
+        elif self.range_shots_limit > BULLETS_CD:
+            if pygame.time.get_ticks() - self.cooldown_time >= TIME_CD:
                 self.range_shots_limit = 0
 
     def regen(self):
         if self.alive:
             if self.hp < 100:
-                self.hp += constants.HP_REGEN
+                self.hp += HP_REGEN
             if self.mp < 100:
-                self.mp += constants.MP_REGEN
+                self.mp += MP_REGEN
 
     def move(self):
         """
         Move player in 2D space according to keys pressed checked at self.moved list.
         Acceleration is applied.
         """
-        if self.collide_with_border(self.tilemap):
-            return
+        self.collide_with_border(self.tilemap)
 
         accel_step = 0.05
         accel_fade = 0.90
         accel_threshold = 1
-        moving_x = bool(self.moving[constants.CHAR_R] or self.moving[constants.CHAR_L])
-        moving_y = bool(self.moving[constants.CHAR_U] or self.moving[constants.CHAR_D])
+        moving_x = bool(self.moving[CHAR_R] or self.moving[CHAR_L])
+        moving_y = bool(self.moving[CHAR_U] or self.moving[CHAR_D])
         if moving_x and moving_y:
             accel_threshold = math.sqrt(2)/2 * accel_threshold
         fade_stop = 0.001
@@ -159,17 +158,17 @@ class Player(BaseCharacter):
 
         if self.can_move:
             # accelerate on keypress
-            if self.moving[constants.CHAR_R] == 1:
-                self.direction = constants.CHAR_R
+            if self.moving[CHAR_R] == 1:
+                self.direction = CHAR_R
                 self.accel_x += accel_step
-            if self.moving[constants.CHAR_L] == 1:
-                self.direction = constants.CHAR_L
+            if self.moving[CHAR_L] == 1:
+                self.direction = CHAR_L
                 self.accel_x -= accel_step
-            if self.moving[constants.CHAR_U] == 1:
-                self.direction = constants.CHAR_U
+            if self.moving[CHAR_U] == 1:
+                self.direction = CHAR_U
                 self.accel_y -= accel_step
-            if self.moving[constants.CHAR_D] == 1:
-                self.direction = constants.CHAR_D
+            if self.moving[CHAR_D] == 1:
+                self.direction = CHAR_D
                 self.accel_y += accel_step
             # limit max speed
             if abs(self.accel_x) > accel_threshold:
@@ -183,11 +182,11 @@ class Player(BaseCharacter):
                 else:
                     self.accel_y = -accel_threshold
             # inertia
-            if not self.moving[constants.CHAR_R] and not self.moving[constants.CHAR_L]:
+            if not self.moving[CHAR_R] and not self.moving[CHAR_L]:
                 self.accel_x *= accel_fade
                 if abs(self.accel_x) < fade_stop:
                     self.accel_x = 0
-            if not self.moving[constants.CHAR_U] and not self.moving[constants.CHAR_D]:
+            if not self.moving[CHAR_U] and not self.moving[CHAR_D]:
                 self.accel_y *= accel_fade
                 if abs(self.accel_y) < fade_stop:
                     self.accel_y = 0
@@ -196,25 +195,25 @@ class Player(BaseCharacter):
             self.y += dy
 
     def shoot(self):
-        if self.mp >= constants.SHOT_MP:
-            if self.range_shots_limit < constants.BULLETS_CD and self.alive:
+        if self.mp >= SHOT_MP:
+            if self.range_shots_limit < BULLETS_CD and self.alive:
                 x = self.x
                 y = self.y
-                if self.direction == constants.CHAR_D:
+                if self.direction == CHAR_D:
                     x = self.x + 16
                     y = self.y + 16
-                if self.direction == constants.CHAR_U:
+                if self.direction == CHAR_U:
                     x = self.x + 16
                     y = self.y + 16
-                if self.direction == constants.CHAR_R:
+                if self.direction == CHAR_R:
                     x = self.x + 16
                     y = self.y + 16
-                if self.direction == constants.CHAR_L:
+                if self.direction == CHAR_L:
                     x = self.x + 16
                     y = self.y + 16
                 self.projectile_objects.append(Bullet(x, y, self.direction))
                 self.range_shots_limit += 1
-                self.mp -= constants.SHOT_MP
+                self.mp -= SHOT_MP
 
     def projectiles_move(self):
         for projectile in self.projectile_objects:

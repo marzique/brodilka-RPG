@@ -45,14 +45,22 @@ BULLETS_CD = 10
 # Time parameters
 TIME_CD = 1500  # 1.5 ms
 
-# fonts
-FONT1 = 'data/fonts/hachicro.ttf'
-FONT2 = 'data/fonts/Fipps-Regular.otf'
+
+class Fonts:
+    main = 'data/fonts/manaspc.ttf'
+    regular = 'data/fonts/Ubuntu-Regular.ttf'
+    light = 'data/fonts/Ubuntu-Regular.ttf'
+    bold = 'data/fonts/Ubuntu-Bold.ttf'
+
 
 # GUI
 HPMP_THICKNESS = 10
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
+
+
+class Color:
+    RED = (255, 0, 0)
+    GREEN = (77, 146, 98)
+    BLUE = (99, 155, 255)
+    BLACK = (0, 0, 0)
+    WHITE = (255, 255, 255)
+    GOLD = (255, 219, 87)

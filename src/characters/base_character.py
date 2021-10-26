@@ -1,8 +1,6 @@
 import pygame
-from pygame.sprite import AbstractGroup
 
-from src import constants
-from src.constants import TILE_SIZE_PX
+from src.constants import TILE_SIZE_PX, CHAR_R, HP_MAX, MP_MAX, GOLD, CORPSEPACK, DEBUG
 from src.core.utils import draw_outline
 
 
@@ -11,12 +9,12 @@ class BaseCharacter(pygame.sprite.Sprite):
         super().__init__()
         self.name = name
         self.x, self.y = coords
-        self.hp = constants.HP_MAX
-        self.mp = constants.MP_MAX
+        self.hp = HP_MAX
+        self.mp = MP_MAX
         self.level = 1
         self.alive = True
-        self.direction = constants.CHAR_R
-        self.gold = constants.GOLD
+        self.direction = CHAR_R
+        self.gold = GOLD
         self.moving = [0, 0, 0, 0]
         self.projectile_objects = []
         self.charpack_list, self.corpsepack_list = self.load_character_sprites()
@@ -37,7 +35,7 @@ class BaseCharacter(pygame.sprite.Sprite):
         ]
 
         # TODO: use 32x32px corsepack
-        corpsepack = pygame.image.load(constants.CORPSEPACK).convert_alpha()
+        corpsepack = pygame.image.load(CORPSEPACK).convert_alpha()
         corpsepack_list = [
             corpsepack.subsurface(0, 0, 270, 260),
             corpsepack.subsurface(270, 0, 270, 260),
@@ -63,7 +61,7 @@ class BaseCharacter(pygame.sprite.Sprite):
         for projectile in self.projectile_objects:
             projectile.render(screen)
         screen.blit(self.image, coords)
-        if constants.DEBUG:
+        if DEBUG:
             draw_outline(screen, self.image, coords)
 
     def update_current_image(self):

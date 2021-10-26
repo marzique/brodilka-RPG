@@ -1,6 +1,6 @@
 import pygame
 
-from src import constants
+from src.constants import HEIGHT, WIDTH, HPMP_THICKNESS, Color, Fonts, GOLD
 from src.utils import add_text
 
 
@@ -8,8 +8,8 @@ class GUI:
     """Class for Player GUI interface layer."""
     def __init__(self, player):
         self.player = player
-        self.height = constants.HEIGHT
-        self.width = constants.WIDTH
+        self.height = HEIGHT
+        self.width = WIDTH
 
     def render(self, screen):
         self.render_ui(screen)
@@ -18,29 +18,29 @@ class GUI:
     def render_ui(self, screen):
         x_start = 10
         pygame.draw.line(
-            screen, constants.BLUE,
-            (x_start, self.height - constants.HPMP_THICKNESS),
-            (x_start + self.player.mp, self.height - constants.HPMP_THICKNESS),
-            constants.HPMP_THICKNESS
+            screen, Color.BLUE,
+            (x_start, self.height - HPMP_THICKNESS),
+            (x_start + self.player.mp, self.height - HPMP_THICKNESS),
+            HPMP_THICKNESS
         )
         pygame.draw.line(
-            screen, constants.RED,
-            (x_start, self.height - constants.HPMP_THICKNESS * 2),
-            (x_start + self.player.hp, self.height - constants.HPMP_THICKNESS * 2),
-            constants.HPMP_THICKNESS
+            screen, Color.RED,
+            (x_start, self.height - HPMP_THICKNESS * 2),
+            (x_start + self.player.hp, self.height - HPMP_THICKNESS * 2),
+            HPMP_THICKNESS
         )
         add_text(
-            screen, f"Level: {self.player.level}",
-            self.player.x, self.player.y - 20,
-            constants.FONT1, 10, constants.GOLD
+            screen, f"lvl: {self.player.level}",
+            x_start, self.height - 35,
+            Fonts.main, 10, Color.GOLD
         )
 
     def render_ammo(self, screen):
         if 10 - self.player.range_shots_limit >= 0:
-            add_text(screen, "Ammo left: " + str(10 - self.player.range_shots_limit), constants.WIDTH * 0.6,
-                     constants.HEIGHT - constants.HEIGHT * 0.95, constants.FONT1, 10, constants.WHITE)
+            add_text(screen, "Ammo left: " + str(10 - self.player.range_shots_limit), WIDTH * 0.6,
+                     HEIGHT - HEIGHT * 0.95, Fonts.main, 14, Color.GOLD)
         else:
-            add_text(screen, "Ammo left: " + '0', constants.WIDTH * 0.6,
-                     constants.HEIGHT - constants.HEIGHT * 0.95, constants.FONT1, 10, constants.RED)
-            add_text(screen, "RELOADING...", constants.WIDTH * 0.6,
-                     constants.HEIGHT - constants.HEIGHT * 0.92, constants.FONT1, 10, constants.RED)
+            add_text(screen, "Ammo left: " + '0', WIDTH * 0.6,
+                     HEIGHT - HEIGHT * 0.95, Fonts.main, 14, Color.RED)
+            add_text(screen, "RELOADING...", WIDTH * 0.6,
+                     HEIGHT - HEIGHT * 0.92, Fonts.regular, 14, Color.RED)

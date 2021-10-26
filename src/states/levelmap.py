@@ -3,9 +3,8 @@ import os
 import pygame
 from pytmx import load_pygame
 
-from src import constants
 from src.characters import Player
-from src.constants import TILE_SIZE_PX
+from src.constants import TILE_SIZE_PX, DEBUG
 from src.core.utils import draw_outline
 from src.states.base_state import BaseState
 
@@ -57,7 +56,7 @@ class LevelMap(BaseState):
             for x, y, image in layer.tiles():
                 topleft = (x * TILE_SIZE_PX, y * TILE_SIZE_PX)
                 screen.blit(image, topleft)
-                if constants.DEBUG:
+                if DEBUG:
                     draw_outline(screen, image, topleft)
 
     def render_mobs(self, screen):

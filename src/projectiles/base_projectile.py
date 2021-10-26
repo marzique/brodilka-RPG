@@ -1,6 +1,6 @@
 import pygame
 
-from src import constants
+from src.constants import CHAR_R, CHAR_U, CHAR_L, CHAR_D, BULLET_DISTANCE
 
 
 class BaseProjectile:
@@ -18,23 +18,22 @@ class BaseProjectile:
                           self.image.subsurface(0, 8, 26, 9),   # R
                           self.image.subsurface(27, 8, 26, 9)]  # L
 
-
     def render(self, screen):
         screen.blit(self.subimages[self.direction], (self.x, self.y))
 
     def move(self):
-        if self.direction == constants.CHAR_R:
+        if self.direction == CHAR_R:
             self.x += self.speed
-        if self.direction == constants.CHAR_L:
+        if self.direction == CHAR_L:
             self.x -= self.speed
-        if self.direction == constants.CHAR_U:
+        if self.direction == CHAR_U:
             self.y -= self.speed
-        if self.direction == constants.CHAR_D:
+        if self.direction == CHAR_D:
             self.y += self.speed
 
     def flew_away(self) -> bool:
-        if self.x - self.start_x >= constants.BULLET_DISTANCE:
+        if self.x - self.start_x >= BULLET_DISTANCE:
             return True
-        if self.y - self.start_y >= constants.BULLET_DISTANCE:
+        if self.y - self.start_y >= BULLET_DISTANCE:
             return True
         return False
