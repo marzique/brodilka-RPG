@@ -1,12 +1,14 @@
 import pygame
+from pygame.sprite import AbstractGroup
 
 from src import constants
 from src.constants import TILE_SIZE_PX
 from src.core.utils import draw_outline
 
 
-class BaseCharacter:
+class BaseCharacter(pygame.sprite.Sprite):
     def __init__(self, name: str, coords: tuple):
+        super().__init__()
         self.name = name
         self.x, self.y = coords
         self.hp = constants.HP_MAX
@@ -72,7 +74,7 @@ class BaseCharacter:
         else:
             sub_dict = self.corpsepack_list
         self.image = sub_dict[self.direction]
-        self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect(topleft=(self.x, self.y))
 
     def projectiles_move(self):
         for projectile in self.projectile_objects:

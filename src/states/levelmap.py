@@ -31,9 +31,9 @@ class LevelMap(BaseState):
         self.player.process_input(event)
 
     def update(self):
+        self.handle_collissions(self.tilemap)
         super().update()
         self.player.update()
-        self.handle_collissions(self.tilemap)
 
     def handle_collissions(self, tilemap):
         for obj in self.colliding_objects:
