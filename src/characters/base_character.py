@@ -57,8 +57,6 @@ class BaseCharacter(pygame.sprite.Sprite):
 
     def update(self):
         self.update_current_image()
-        self.move()
-        self.projectiles_move()
 
     def render(self, screen):
         coords = (self.x, self.y)
@@ -75,13 +73,6 @@ class BaseCharacter(pygame.sprite.Sprite):
             sub_dict = self.corpsepack_list
         self.image = sub_dict[self.direction]
         self.rect = self.image.get_rect(topleft=(self.x, self.y))
-
-    def projectiles_move(self):
-        for projectile in self.projectile_objects:
-            if projectile.flew_away():
-                self.projectile_objects.remove(projectile)
-            else:
-                projectile.move()
 
     def move(self):
         print('Trying to move...')

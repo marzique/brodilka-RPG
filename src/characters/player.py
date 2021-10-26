@@ -35,6 +35,8 @@ class Player(BaseCharacter):
 
     def update(self):
         super().update()
+        self.move()
+        self.projectiles_move()
         self.regen()
         self.cooldown()
 
@@ -118,8 +120,7 @@ class Player(BaseCharacter):
                 self.accel_y = 0
                 collides = True
 
-        print(self.x, self.y)
-        print(tilemap.width, tilemap.height)
+        # print(self.x, self.y)
         return collides
 
     def cooldown(self):
@@ -142,16 +143,19 @@ class Player(BaseCharacter):
         Move player in 2D space according to keys pressed checked at self.moved list.
         Acceleration is applied.
         """
-        accel_step = 0.2
-        accel_fade = 0.90
-        accel_threshold = 1
-        fade_stop = 0.001
-
-        dx = self.accel_x
-        dy = self.accel_y
-
         if self.collide_with_border(self.tilemap):
             return
+
+        accel_step = 0.05
+        accel_fade = 0.90
+        accel_threshold = 1
+        moving_x = bool(self.moving[constants.CHAR_R] or self.moving[constants.CHAR_L])
+        moving_y = bool(self.moving[constants.CHAR_U] or self.moving[constants.CHAR_D])
+        if moving_x and moving_y:
+            accel_threshold = math.sqrt(2)/2 * accel_threshold
+        fade_stop = 0.001
+        dx = self.accel_x
+        dy = self.accel_y
 
         if self.can_move:
             # accelerate on keypress
@@ -167,20 +171,17 @@ class Player(BaseCharacter):
             if self.moving[constants.CHAR_D] == 1:
                 self.direction = constants.CHAR_D
                 self.accel_y += accel_step
-
             # limit max speed
             if abs(self.accel_x) > accel_threshold:
                 if self.accel_x > 0:
                     self.accel_x = accel_threshold
                 else:
                     self.accel_x = -accel_threshold
-
             if abs(self.accel_y) > accel_threshold:
                 if self.accel_y > 0:
                     self.accel_y = accel_threshold
                 else:
                     self.accel_y = -accel_threshold
-
             # inertia
             if not self.moving[constants.CHAR_R] and not self.moving[constants.CHAR_L]:
                 self.accel_x *= accel_fade
@@ -190,17 +191,7 @@ class Player(BaseCharacter):
                 self.accel_y *= accel_fade
                 if abs(self.accel_y) < fade_stop:
                     self.accel_y = 0
-
-            # diagonal movement
-            moving_x = bool(self.moving[constants.CHAR_R] or self.moving[constants.CHAR_L])
-            moving_y = bool(self.moving[constants.CHAR_U] or self.moving[constants.CHAR_D])
-            diagonal_k = math.sqrt(2)/2
-            if moving_x and moving_y:
-                self.accel_x *= diagonal_k
-                self.accel_y *= diagonal_k
-
             # print(f'player accel: {self.accel_x, self.accel_y}')
-
             self.x += dx
             self.y += dy
 
@@ -224,3 +215,10 @@ class Player(BaseCharacter):
                 self.projectile_objects.append(Bullet(x, y, self.direction))
                 self.range_shots_limit += 1
                 self.mp -= constants.SHOT_MP
+
+    def projectiles_move(self):
+        for projectile in self.projectile_objects:
+            if projectile.flew_away():
+                self.projectile_objects.remove(projectile)
+            else:
+                projectile.move()
