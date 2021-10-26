@@ -3,7 +3,6 @@ import pygame
 from pygame import DOUBLEBUF, QUIT
 from pygame.constants import HWSURFACE
 
-from .import constants
 from .constants import WIDTH, HEIGHT
 from .states import get_state
 
@@ -11,7 +10,7 @@ from .states import get_state
 class Control:
     """Main class of the game that implements game loop pattern."""
     def __init__(self):
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.SCALED | HWSURFACE | DOUBLEBUF)
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.SCALED | pygame.NOFRAME | HWSURFACE | DOUBLEBUF)
         self.running = True
         self.fps = 144
         self.clock = pygame.time.Clock()

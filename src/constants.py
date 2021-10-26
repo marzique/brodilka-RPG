@@ -64,3 +64,7 @@ class Color:
     BLACK = (0, 0, 0)
     WHITE = (255, 255, 255)
     GOLD = (255, 219, 87)
+
+
+class TileTypes:
+    BLOCKER = 'blocker'

@@ -4,7 +4,7 @@ import pygame
 
 from src.characters.base_character import BaseCharacter
 from src.constants import TILE_SIZE_PX, PLAYER_HEIGHT, PLAYER_WIDTH, DEBUG, CHAR_R, CHAR_L, CHAR_U, CHAR_D, \
-    BULLETS_CD, TIME_CD, HP_REGEN, MP_REGEN, SHOT_MP
+    BULLETS_CD, TIME_CD, HP_REGEN, MP_REGEN, SHOT_MP, TileTypes
 from src.gui import GUI
 from src.projectiles import Bullet
 
@@ -20,6 +20,7 @@ class Player(BaseCharacter):
         self.accel_x = 0
         self.accel_y = 0
         self.collided_rect_outline = None
+        self.colliding_tiles = set()
         self.current_tile = None
 
     def process_input(self, event):
@@ -43,9 +44,18 @@ class Player(BaseCharacter):
     def render(self, screen):
         super().render(screen)
         self.interface.render(screen)
-        if self.current_tile.get('type') == 'blocker':
-            if DEBUG:
-                pygame.draw.rect(screen, [255, 0, 0], self.collided_rect_outline, 1)
+        if DEBUG:
+            for x, y in self.colliding_tiles:
+                tile_rect = pygame.Rect(x * TILE_SIZE_PX, y * TILE_SIZE_PX, TILE_SIZE_PX, TILE_SIZE_PX)
+                tile_properties = self.get_tile_image_properties(x, y)
+                if tile_properties.get('type') == TileTypes.BLOCKER:
+                    pygame.draw.rect(screen, [255, 0, 0], tile_rect, 1)
+
+    def get_tile_image_properties(self, x, y, layer=0):
+        try:
+            return self.tilemap.get_tile_properties(int(x), int(y), layer) or {}
+        except ValueError:
+            return {}
 
     def _process_wasd(self, event):
         """
@@ -77,14 +87,16 @@ class Player(BaseCharacter):
 
     def handle_collissions(self, tilemap):
         self.tilemap = tilemap
-        x = self.x // TILE_SIZE_PX
-        y = self.y // TILE_SIZE_PX
-        try:
-            self.current_tile = tilemap.get_tile_properties(x, y, 0) or {}
-        except ValueError:
-            # print(f'Player outside the map, coords: {x, y} ')
-            pass
-        self.collided_rect_outline = pygame.Rect(x * TILE_SIZE_PX, y * TILE_SIZE_PX, TILE_SIZE_PX, TILE_SIZE_PX)
+        self.update_collided_with_tiles()
+
+    def update_collided_with_tiles(self):
+        corners = [
+            (self.x // TILE_SIZE_PX, self.y // TILE_SIZE_PX),
+            ((self.x + TILE_SIZE_PX) // TILE_SIZE_PX, self.y // TILE_SIZE_PX),
+            (self.x // TILE_SIZE_PX, (self.y + TILE_SIZE_PX) // TILE_SIZE_PX),
+            ((self.x + TILE_SIZE_PX) // TILE_SIZE_PX, (self.y + TILE_SIZE_PX) // TILE_SIZE_PX)
+        ]
+        self.colliding_tiles = {*corners}
 
     def collide_with_border(self, tilemap):
         """
@@ -99,26 +111,25 @@ class Player(BaseCharacter):
         center_y = self.y + tile_center
         collides = False
 
-        if self.moving[CHAR_R] == 1:
-            if center_x >= map_width:
-                self.x = map_width - tile_center
-                self.accel_x = 0
-                collides = True
-        if self.moving[CHAR_L] == 1:
-            if center_x <= 0:
-                self.x = 0 - tile_center
-                self.accel_x = 0
-                collides = True
-        if self.moving[CHAR_U] == 1:
-            if center_y <= 0:
-                self.y = 0 - tile_center
-                self.accel_y = 0
-                collides = True
-        if self.moving[CHAR_D] == 1:
-            if center_y >= map_height:
-                self.y = map_height - tile_center
-                self.accel_y = 0
-                collides = True
+        moving_x = abs(self.accel_x)
+        moving_y = abs(self.accel_y)
+
+        if center_x > map_width and moving_x:
+            self.x = map_width - tile_center
+            self.accel_x = 0
+            collides = True
+        if center_x < 0 and moving_x:
+            self.x = 0 - tile_center
+            self.accel_x = 0
+            collides = True
+        if center_y < 0 and moving_y:
+            self.y = 0 - tile_center
+            self.accel_y = 0
+            collides = True
+        if center_y > map_height and moving_y:
+            self.y = map_height - tile_center
+            self.accel_y = 0
+            collides = True
 
         # print(self.x, self.y)
         return collides
@@ -146,7 +157,7 @@ class Player(BaseCharacter):
         self.collide_with_border(self.tilemap)
 
         accel_step = 0.05
-        accel_fade = 0.90
+        accel_fade = 0.95
         accel_threshold = 1
         moving_x = bool(self.moving[CHAR_R] or self.moving[CHAR_L])
         moving_y = bool(self.moving[CHAR_U] or self.moving[CHAR_D])
