@@ -1,7 +1,7 @@
 import pygame
 
-from src.constants import HEIGHT, WIDTH, HPMP_THICKNESS, Color, Fonts, GOLD
-from src.utils import add_text
+from src.constants import HEIGHT, WIDTH, HPMP_THICKNESS, Colors, Fonts, GOLD
+from src.core.utils import add_text
 
 
 class GUI:
@@ -18,13 +18,13 @@ class GUI:
     def render_ui(self, screen):
         x_start = 10
         pygame.draw.line(
-            screen, Color.BLUE,
+            screen, Colors.BLUE,
             (x_start, self.height - HPMP_THICKNESS),
             (x_start + self.player.mp, self.height - HPMP_THICKNESS),
             HPMP_THICKNESS
         )
         pygame.draw.line(
-            screen, Color.RED,
+            screen, Colors.RED,
             (x_start, self.height - HPMP_THICKNESS * 2),
             (x_start + self.player.hp, self.height - HPMP_THICKNESS * 2),
             HPMP_THICKNESS
@@ -32,15 +32,15 @@ class GUI:
         add_text(
             screen, f"lvl: {self.player.level}",
             x_start, self.height - 35,
-            Fonts.main, 10, Color.GOLD
+            Fonts.main, 10, Colors.GOLD
         )
 
     def render_ammo(self, screen):
         if 10 - self.player.range_shots_limit >= 0:
             add_text(screen, "Ammo left: " + str(10 - self.player.range_shots_limit), WIDTH * 0.6,
-                     HEIGHT - HEIGHT * 0.95, Fonts.main, 14, Color.GOLD)
+                     HEIGHT - HEIGHT * 0.95, Fonts.main, 14, Colors.GOLD)
         else:
             add_text(screen, "Ammo left: " + '0', WIDTH * 0.6,
-                     HEIGHT - HEIGHT * 0.95, Fonts.main, 14, Color.RED)
+                     HEIGHT - HEIGHT * 0.95, Fonts.main, 14, Colors.RED)
             add_text(screen, "RELOADING...", WIDTH * 0.6,
-                     HEIGHT - HEIGHT * 0.92, Fonts.regular, 14, Color.RED)
+                     HEIGHT - HEIGHT * 0.92, Fonts.regular, 14, Colors.RED)

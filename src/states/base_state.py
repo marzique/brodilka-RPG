@@ -3,10 +3,6 @@ from abc import ABC, abstractmethod
 
 class AbstractState(ABC):
     @abstractmethod
-    def __init__(self):
-        pass
-
-    @abstractmethod
     def process_input(self, event):
         pass
 
@@ -16,14 +12,6 @@ class AbstractState(ABC):
 
     @abstractmethod
     def render(self, screen):
-        pass
-
-    @abstractmethod
-    def startup(self):
-        pass
-
-    @abstractmethod
-    def cleanup(self):
         pass
 
 
@@ -51,12 +39,4 @@ class BaseState(AbstractState):
 
     def render(self, screen):
         # print(f'{type(self).__name__} performed render')
-        pass
-
-    def startup(self):
-        # print(f'{type(self).__name__} performed startup')
-        pass
-
-    def cleanup(self):
-        # print(f'{type(self).__name__} performed cleanup')
         pass

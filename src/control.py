@@ -8,9 +8,11 @@ from .states import get_state
 
 
 class Control:
+    WINDOW_SETTINGS = pygame.SCALED | HWSURFACE | DOUBLEBUF  # | pygame.NOFRAME
+
     """Main class of the game that implements game loop pattern."""
     def __init__(self):
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.SCALED | pygame.NOFRAME | HWSURFACE | DOUBLEBUF)
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT), self.WINDOW_SETTINGS)
         self.running = True
         self.fps = 144
         self.clock = pygame.time.Clock()
@@ -21,7 +23,7 @@ class Control:
         Main game method that encapsulates 3 steps performed on every iteration:
         1) process client input;
         2) update game state;
-        3) render new frame.
+        3) render state to the screen
         """
         while self.running:
             self.process_input()

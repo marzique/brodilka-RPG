@@ -4,18 +4,18 @@ import pygame
 from pytmx import load_pygame
 
 from src.characters import Player
-from src.constants import TILE_SIZE_PX, DEBUG
+from src.constants import TILE_SIZE_PX, DEBUG, TileTypes
 from src.core.utils import draw_outline
 from src.states.base_state import BaseState
 
 
-class LevelMap(BaseState):
+class MapLevel(BaseState):
     """Base class for all game levels a.k.a. maps."""
     def __init__(self, name):
         super().__init__()
         self.name = name
         self.tilemap = self.load_tilemap(name)
-        self.player = Player('Tester', coords=(50, 150))
+        self.player = Player('Tester', coords=(50, 150), map_level=self)
         self.colliding_objects = [self.player]
         self.mobs = self.generate_mobs()
 
@@ -30,13 +30,24 @@ class LevelMap(BaseState):
         self.player.process_input(event)
 
     def update(self):
-        self.handle_collissions(self.tilemap)
+        self.handle_collissions()
         super().update()
         self.player.update()
 
-    def handle_collissions(self, tilemap):
+    def handle_collissions(self):
         for obj in self.colliding_objects:
-            obj.handle_collissions(tilemap)
+            obj.handle_collissions()
+
+    def is_blocker(self, x, y):
+        tile_properties = {}
+        try:
+            tile_properties = self.tilemap.get_tile_properties(x // TILE_SIZE_PX, y // TILE_SIZE_PX, 0) or {}
+        except ValueError:
+            tile_properties = {}
+        finally:
+            if tile_properties.get('type') == TileTypes.BLOCKER:
+                return True
+            return False
 
     def generate_mobs(self):
         # TODO: generate all types of objects present in level
@@ -63,8 +74,3 @@ class LevelMap(BaseState):
         for mob in self.mobs:
             pygame.draw.rect(screen, [173, 100, 170], mob, 1)
 
-    def startup(self):
-        super().startup()
-
-    def cleanup(self):
-        super().cleanup()

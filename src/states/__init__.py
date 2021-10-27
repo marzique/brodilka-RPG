@@ -1,5 +1,5 @@
 from .menu import MainMenu
-from .levelmap import LevelMap
+from .maplevel import MapLevel
 
 
 # String mapping of all game states.
@@ -7,9 +7,9 @@ from .levelmap import LevelMap
 def get_state(name):
     states = {
         'MainMenu': MainMenu(),
-        'Dungeon': LevelMap('level1')
+        'Dungeon': MapLevel('level1')
     }
     return states[name]
 
 
-__all__ = ['get_state', 'MainMenu', 'LevelMap']
+__all__ = ['get_state', 'MainMenu', 'MapLevel']

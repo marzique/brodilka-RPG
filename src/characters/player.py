@@ -4,15 +4,15 @@ import pygame
 
 from src.characters.base_character import BaseCharacter
 from src.constants import TILE_SIZE_PX, PLAYER_HEIGHT, PLAYER_WIDTH, DEBUG, CHAR_R, CHAR_L, CHAR_U, CHAR_D, \
-    BULLETS_CD, TIME_CD, HP_REGEN, MP_REGEN, SHOT_MP, TileTypes
+    BULLETS_CD, TIME_CD, HP_REGEN, MP_REGEN, SHOT_MP, Colors
 from src.gui import GUI
 from src.projectiles import Bullet
+from src.core.utils import get_topleft
 
 
 class Player(BaseCharacter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.tilemap = None  # O2O
         self.range_shots_limit = 0  # shoots after cooldown
         self.cooldown_time = 0  # msec
         self.interface = GUI(self)
@@ -20,7 +20,8 @@ class Player(BaseCharacter):
         self.accel_x = 0
         self.accel_y = 0
         self.collided_rect_outline = None
-        self.colliding_tiles = set()
+        self.colliding_tiles_toplefts = set()
+        self.colliding_blockers = []
         self.current_tile = None
 
     def process_input(self, event):
@@ -33,29 +34,6 @@ class Player(BaseCharacter):
                 else:
                     self.resurrect()
         self._process_wasd(event)
-
-    def update(self):
-        super().update()
-        self.move()
-        self.projectiles_move()
-        self.regen()
-        self._cooldown()
-
-    def render(self, screen):
-        super().render(screen)
-        self.interface.render(screen)
-        if DEBUG:
-            for x, y in self.colliding_tiles:
-                tile_rect = pygame.Rect(x * TILE_SIZE_PX, y * TILE_SIZE_PX, TILE_SIZE_PX, TILE_SIZE_PX)
-                tile_properties = self.get_tile_image_properties(x, y)
-                if tile_properties.get('type') == TileTypes.BLOCKER:
-                    pygame.draw.rect(screen, [255, 0, 0], tile_rect, 1)
-
-    def get_tile_image_properties(self, x, y, layer=0):
-        try:
-            return self.tilemap.get_tile_properties(int(x), int(y), layer) or {}
-        except ValueError:
-            return {}
 
     def _process_wasd(self, event):
         """
@@ -85,54 +63,81 @@ class Player(BaseCharacter):
             if event.key == pygame.K_s:
                 self.moving[CHAR_D] = 0
 
-    def handle_collissions(self, tilemap):
-        self.tilemap = tilemap
-        self.update_collided_with_tiles()
+    def update(self):
+        super().update()
+        self.move()
+        self.collide()
+        self.projectiles_move()
+        self.regen()
+        self._cooldown()
 
-    def update_collided_with_tiles(self):
-        corners = [
-            (self.x // TILE_SIZE_PX, self.y // TILE_SIZE_PX),
-            ((self.x + TILE_SIZE_PX) // TILE_SIZE_PX, self.y // TILE_SIZE_PX),
-            (self.x // TILE_SIZE_PX, (self.y + TILE_SIZE_PX) // TILE_SIZE_PX),
-            ((self.x + TILE_SIZE_PX) // TILE_SIZE_PX, (self.y + TILE_SIZE_PX) // TILE_SIZE_PX)
-        ]
-        self.colliding_tiles = {*corners}
+    def handle_collissions(self):
+        self.update_blockers()
 
-    def collide_with_border(self, tilemap):
+    def update_blockers(self):
+        blockers = []
+        for x, y in self.get_colliding_tiles_toplefts():
+            if self.map_level.is_blocker(x, y):
+                tile_rect = pygame.Rect(x, y, TILE_SIZE_PX, TILE_SIZE_PX)
+                blockers.append(tile_rect)
+        self.colliding_blockers = blockers
+
+    def get_colliding_tiles_toplefts(self):
+        x, y = get_topleft(self.x, self.y)
+        corners = [(x, y), (x + TILE_SIZE_PX, y), (x, y + TILE_SIZE_PX), (x + TILE_SIZE_PX, y + TILE_SIZE_PX)]
+        return corners
+
+    def collide(self):
+        # TODO: FIX BUG WITH DIAGONAL MOVEMENT
+        for tile in self.colliding_blockers:
+            if tile.right >= self.rect.left + 1 and self.accel_x < 0:
+                print('LEFT')
+                self.accel_x = 0
+                self.x = self.rect.left + 1
+            if tile.left <= self.rect.right and self.accel_x > 0:
+                print('RIGHT')
+                self.accel_x = 0
+                self.x = self.rect.right - TILE_SIZE_PX - 1
+
+        for tile in self.colliding_blockers:
+            if tile.top <= self.rect.bottom + 1 and self.accel_y > 0:
+                print('DOWN')
+                self.accel_y = 0
+                self.y = self.rect.top - 1
+            if tile.bottom >= self.rect.top - 1 and self.accel_y < 0:
+                print('UP')
+                self.accel_y = 0
+                self.y = self.rect.bottom - TILE_SIZE_PX + 1
+
+        self.collide_with_border()
+
+    def collide_with_border(self):
         """
         Collide with borders of the map.
-        Should server as a fallback check for mistakes in levels.
+        Should serve as a fallback check for mistakes in levels.
         By default all level maps should have border of blocker type tiles.
         """
-        map_width = tilemap.width * TILE_SIZE_PX
-        map_height = tilemap.height * TILE_SIZE_PX
+        map_width = self.map_level.tilemap.width * TILE_SIZE_PX
+        map_height = self.map_level.tilemap.height * TILE_SIZE_PX
         tile_center = TILE_SIZE_PX // 2
         center_x = self.x + tile_center
         center_y = self.y + tile_center
-        collides = False
-
         moving_x = abs(self.accel_x)
         moving_y = abs(self.accel_y)
 
         if center_x > map_width and moving_x:
             self.x = map_width - tile_center
             self.accel_x = 0
-            collides = True
         if center_x < 0 and moving_x:
             self.x = 0 - tile_center
             self.accel_x = 0
-            collides = True
         if center_y < 0 and moving_y:
             self.y = 0 - tile_center
             self.accel_y = 0
-            collides = True
         if center_y > map_height and moving_y:
             self.y = map_height - tile_center
             self.accel_y = 0
-            collides = True
-
         # print(self.x, self.y)
-        return collides
 
     def _cooldown(self):
         if self.range_shots_limit == BULLETS_CD:
@@ -150,22 +155,16 @@ class Player(BaseCharacter):
                 self.mp += MP_REGEN
 
     def move(self):
-        """
-        Move player in 2D space according to keys pressed checked at self.moved list.
-        Acceleration is applied.
-        """
-        self.collide_with_border(self.tilemap)
+        """Move player in 2D space according to keys pressed checked at self.moved list."""
 
         accel_step = 0.05
         accel_fade = 0.95
+        fade_stop = 0.001
         accel_threshold = 1
         moving_x = bool(self.moving[CHAR_R] or self.moving[CHAR_L])
         moving_y = bool(self.moving[CHAR_U] or self.moving[CHAR_D])
         if moving_x and moving_y:
             accel_threshold = math.sqrt(2)/2 * accel_threshold
-        fade_stop = 0.001
-        dx = self.accel_x
-        dy = self.accel_y
 
         if self.can_move:
             # accelerate on keypress
@@ -202,11 +201,13 @@ class Player(BaseCharacter):
                 if abs(self.accel_y) < fade_stop:
                     self.accel_y = 0
             # print(f'player accel: {self.accel_x, self.accel_y}')
-            self.x += dx
-            self.y += dy
+
+            self.x += self.accel_x
+            self.y += self.accel_y
 
     def shoot(self):
         if self.mp >= SHOT_MP:
+            self.mp -= SHOT_MP
             if self.range_shots_limit < BULLETS_CD and self.alive:
                 x = self.x
                 y = self.y
@@ -224,7 +225,6 @@ class Player(BaseCharacter):
                     y = self.y + 16
                 self.projectile_objects.append(Bullet(x, y, self.direction))
                 self.range_shots_limit += 1
-                self.mp -= SHOT_MP
 
     def projectiles_move(self):
         for projectile in self.projectile_objects:
@@ -232,3 +232,10 @@ class Player(BaseCharacter):
                 self.projectile_objects.remove(projectile)
             else:
                 projectile.move()
+
+    def render(self, screen):
+        super().render(screen)
+        self.interface.render(screen)
+        if DEBUG:
+            for tile_rect in self.colliding_blockers:
+                pygame.draw.rect(screen, Colors.RED, tile_rect, 1)
