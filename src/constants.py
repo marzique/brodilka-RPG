@@ -41,7 +41,7 @@ HPMP_THICKNESS = 10
 
 class Colors:
     RED = (255, 0, 0)
-    GREEN = (77, 146, 98)
+    GREEN = (33, 255, 33)
     BLUE = (33, 55, 255)
     LTBLUE = (0, 229, 255)
     BLACK = (0, 0, 0)

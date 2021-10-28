@@ -3,7 +3,7 @@ import os
 import pygame
 from pytmx import load_pygame
 
-from src.characters import Player
+from src.characters import Player, BaseCharacter
 from src.constants import TILE_SIZE_PX, DEBUG, TileTypes
 from src.core.utils import draw_outline
 from src.states.base_state import BaseState
@@ -16,7 +16,6 @@ class MapLevel(BaseState):
         self.name = name
         self.tilemap = self.load_tilemap(name)
         self.player = Player('Tester', coords=(50, 150), map_level=self)
-        self.colliding_objects = [self.player]
         self.mobs = self.generate_mobs()
 
     @staticmethod
@@ -30,13 +29,8 @@ class MapLevel(BaseState):
         self.player.process_input(event)
 
     def update(self):
-        self.handle_collissions()
         super().update()
         self.player.update()
-
-    def handle_collissions(self):
-        for obj in self.colliding_objects:
-            obj.handle_collissions()
 
     def is_blocker(self, x, y):
         tile_properties = {}
@@ -49,12 +43,22 @@ class MapLevel(BaseState):
                 return True
             return False
 
+    @staticmethod
+    def on_the_same_line(tile: pygame.Rect, player: BaseCharacter):
+        if tile.center[1] - player.rect.center[1] < (TILE_SIZE_PX // 2):
+            return True
+        return False
+
+    @staticmethod
+    def in_the_same_row(tile: pygame.Rect, player: BaseCharacter):
+        if tile.center[0] - player.rect.center[0] < (TILE_SIZE_PX // 2):
+            return True
+        return False
+
     def generate_mobs(self):
         # TODO: generate all types of objects present in level
         button = pygame.Rect(500, 500, TILE_SIZE_PX, TILE_SIZE_PX)
         mobs = [button]
-        # TODO: objects must have handle_collissions()
-        # self.colliding_objects += mobs
         return mobs
 
     def render(self, screen):

@@ -7,7 +7,6 @@ from src.constants import TILE_SIZE_PX, PLAYER_HEIGHT, PLAYER_WIDTH, DEBUG, CHAR
     BULLETS_CD, TIME_CD, HP_REGEN, MP_REGEN, SHOT_MP, Colors
 from src.gui import GUI
 from src.projectiles import Bullet
-from src.core.utils import get_topleft
 
 
 class Player(BaseCharacter):
@@ -16,13 +15,8 @@ class Player(BaseCharacter):
         self.range_shots_limit = 0  # shoots after cooldown
         self.cooldown_time = 0  # msec
         self.interface = GUI(self)
-        self.size = (PLAYER_HEIGHT, PLAYER_WIDTH)
         self.accel_x = 0
         self.accel_y = 0
-        self.collided_rect_outline = None
-        self.colliding_tiles_toplefts = set()
-        self.colliding_blockers = []
-        self.current_tile = None
 
     def process_input(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -34,6 +28,22 @@ class Player(BaseCharacter):
                 else:
                     self.resurrect()
         self._process_wasd(event)
+
+    def update(self):
+        super().update()
+        self.update_blockers()
+        self.move()
+        self.regen()
+        self._cooldown()
+
+    def render(self, screen):
+        super().render(screen)
+        self.interface.render(screen)
+        if DEBUG:
+            # player rect
+            pygame.draw.rect(screen, Colors.GOLD, self.rect, 1)
+            # player rect border
+            pygame.draw.rect(screen, Colors.LTBLUE, self.rect_border, 1)
 
     def _process_wasd(self, event):
         """
@@ -63,55 +73,7 @@ class Player(BaseCharacter):
             if event.key == pygame.K_s:
                 self.moving[CHAR_D] = 0
 
-    def update(self):
-        super().update()
-        self.move()
-        print(self.x, self.y)
-        print(self.colliding_blockers)
-        self.projectiles_move()
-        self.regen()
-        self._cooldown()
-
-    def handle_collissions(self):
-        self.update_blockers()
-
-    def update_blockers(self):
-        blockers = []
-        for x, y in self.get_colliding_tiles_toplefts():
-            if self.map_level.is_blocker(x, y):
-                tile_rect = pygame.Rect(x, y, TILE_SIZE_PX, TILE_SIZE_PX)
-                blockers.append(tile_rect)
-        self.colliding_blockers = blockers
-
-    def get_colliding_tiles_toplefts(self):
-        x, y = get_topleft(self.x, self.y)
-        corners = [(x, y), (x + TILE_SIZE_PX, y), (x, y + TILE_SIZE_PX), (x + TILE_SIZE_PX, y + TILE_SIZE_PX)]
-        return corners
-
-    def collide_with_blockers(self):
-        x_stopped = None
-        y_stopped = None
-        for tile in self.colliding_blockers:
-            if tile.right >= self.rect.left and self.accel_x < 0:
-                print('LEFT')
-                self.accel_x = 0
-                x_stopped = self.rect.left + 1
-            elif tile.left <= self.rect.right and self.accel_x > 0:
-                print('RIGHT')
-                self.accel_x = 0
-                x_stopped = self.rect.right - TILE_SIZE_PX - 1
-
-            elif tile.top <= self.rect.bottom and self.accel_y > 0:
-                print('DOWN')
-                self.accel_y = 0
-                y_stopped = self.rect.top - 1
-            elif tile.bottom >= self.rect.top and self.accel_y < 0:
-                print('UP')
-                self.accel_y = 0
-                y_stopped = self.rect.bottom - TILE_SIZE_PX + 1
-        return x_stopped, y_stopped
-
-    def collide_with_border(self):
+    def collide_with_map_border(self):
         """
         Collide with borders of the map.
         Should serve as a fallback check for mistakes in levels.
@@ -155,7 +117,7 @@ class Player(BaseCharacter):
                 self.mp += MP_REGEN
 
     def move(self):
-        """Move player in 2D space according to keys pressed checked at self.moved list."""
+        """Update x and y of the player"""
         accel_step = 0.05
         if self.can_move:
             # accelerate on keypress
@@ -175,9 +137,40 @@ class Player(BaseCharacter):
             x_stopped, y_stopped = self.collide_with_blockers()
             self.x = x_stopped or self.x + self.accel_x
             self.y = y_stopped or self.y + self.accel_y
-            self.collide_with_border()
+            self.collide_with_map_border()
             self.fade_speed()
             self.limit_max_speed()
+
+    def collide_with_blockers(self):
+        x_stopped = None
+        y_stopped = None
+        for name, tile in self.colliding_blockers.items():
+            # print(self.colliding_blockers)
+            on_the_same_line = self.map_level.on_the_same_line(tile, self)
+            in_the_same_row = self.map_level.in_the_same_row(tile, self)
+            if on_the_same_line:
+                if tile.right >= self.rect_border.left and self.accel_x < 0:
+                    if name in ['topleft', 'bottomleft']:
+                        print('LEFT')
+                        self.accel_x = 0
+                        x_stopped = tile.right + 1
+                if tile.left <= self.rect_border.right and self.accel_x > 0:
+                    if name in ['topright', 'bottomright']:
+                        print('RIGHT')
+                        self.accel_x = 0
+                        x_stopped = tile.left - TILE_SIZE_PX
+            if in_the_same_row:
+                if tile.top <= self.rect_border.bottom and self.accel_y > 0:
+                    if name in ['bottomleft', 'bottomright']:
+                        print('DOWN')
+                        self.accel_y = 0
+                        y_stopped = tile.top - TILE_SIZE_PX
+                if tile.bottom >= self.rect_border.top and self.accel_y < 0:
+                    if name in ['topleft', 'topright']:
+                        print('UP')
+                        self.accel_y = 0
+                        y_stopped = tile.bottom
+        return x_stopped, y_stopped
 
     def fade_speed(self):
         accel_fade = 0.95
@@ -229,17 +222,3 @@ class Player(BaseCharacter):
                     y = self.y + 16
                 self.projectile_objects.append(Bullet(x, y, self.direction))
                 self.range_shots_limit += 1
-
-    def projectiles_move(self):
-        for projectile in self.projectile_objects:
-            if projectile.flew_away():
-                self.projectile_objects.remove(projectile)
-            else:
-                projectile.move()
-
-    def render(self, screen):
-        super().render(screen)
-        self.interface.render(screen)
-        if DEBUG:
-            for tile_rect in self.colliding_blockers:
-                pygame.draw.rect(screen, Colors.RED, tile_rect, 1)
