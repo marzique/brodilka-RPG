@@ -66,7 +66,6 @@ class Player(BaseCharacter):
     def update(self):
         super().update()
         self.move()
-        self.collide()
         print(self.x, self.y)
         print(self.colliding_blockers)
         self.projectiles_move()
@@ -89,26 +88,28 @@ class Player(BaseCharacter):
         corners = [(x, y), (x + TILE_SIZE_PX, y), (x, y + TILE_SIZE_PX), (x + TILE_SIZE_PX, y + TILE_SIZE_PX)]
         return corners
 
-    def collide(self):
-        # TODO: FIX BUG WITH DIAGONAL MOVEMENT
+    def collide_with_blockers(self):
+        x_stopped = None
+        y_stopped = None
         for tile in self.colliding_blockers:
             if tile.right >= self.rect.left and self.accel_x < 0:
                 print('LEFT')
                 self.accel_x = 0
-                self.x = self.rect.left + 1
+                x_stopped = self.rect.left + 1
             elif tile.left <= self.rect.right and self.accel_x > 0:
                 print('RIGHT')
                 self.accel_x = 0
-                self.x = self.rect.right - TILE_SIZE_PX - 1
+                x_stopped = self.rect.right - TILE_SIZE_PX - 1
+
             elif tile.top <= self.rect.bottom and self.accel_y > 0:
                 print('DOWN')
                 self.accel_y = 0
-                self.y = self.rect.top - 1
+                y_stopped = self.rect.top - 1
             elif tile.bottom >= self.rect.top and self.accel_y < 0:
                 print('UP')
                 self.accel_y = 0
-                self.y = self.rect.bottom - TILE_SIZE_PX + 1
-        self.collide_with_border()
+                y_stopped = self.rect.bottom - TILE_SIZE_PX + 1
+        return x_stopped, y_stopped
 
     def collide_with_border(self):
         """
@@ -155,54 +156,58 @@ class Player(BaseCharacter):
 
     def move(self):
         """Move player in 2D space according to keys pressed checked at self.moved list."""
-
         accel_step = 0.05
+        if self.can_move:
+            # accelerate on keypress
+            if self.moving[CHAR_R]:
+                self.direction = CHAR_R
+                self.accel_x += accel_step
+            if self.moving[CHAR_L]:
+                self.direction = CHAR_L
+                self.accel_x -= accel_step
+            if self.moving[CHAR_U]:
+                self.direction = CHAR_U
+                self.accel_y -= accel_step
+            if self.moving[CHAR_D]:
+                self.direction = CHAR_D
+                self.accel_y += accel_step
+
+            x_stopped, y_stopped = self.collide_with_blockers()
+            self.x = x_stopped or self.x + self.accel_x
+            self.y = y_stopped or self.y + self.accel_y
+            self.collide_with_border()
+            self.fade_speed()
+            self.limit_max_speed()
+
+    def fade_speed(self):
         accel_fade = 0.95
         fade_stop = 0.001
+        if not self.moving[CHAR_R] and not self.moving[CHAR_L]:
+            self.accel_x *= accel_fade
+            if abs(self.accel_x) < fade_stop:
+                self.accel_x = 0
+        if not self.moving[CHAR_U] and not self.moving[CHAR_D]:
+            self.accel_y *= accel_fade
+            if abs(self.accel_y) < fade_stop:
+                self.accel_y = 0
+
+    def limit_max_speed(self):
         accel_threshold = 1
         moving_x = bool(self.moving[CHAR_R] or self.moving[CHAR_L])
         moving_y = bool(self.moving[CHAR_U] or self.moving[CHAR_D])
-        if moving_x and moving_y:
+        if moving_x and moving_y:  # diagonal adjustment
             accel_threshold = math.sqrt(2)/2 * accel_threshold
 
-        if self.can_move:
-            # accelerate on keypress
-            if self.moving[CHAR_R] == 1:
-                self.direction = CHAR_R
-                self.accel_x += accel_step
-            if self.moving[CHAR_L] == 1:
-                self.direction = CHAR_L
-                self.accel_x -= accel_step
-            if self.moving[CHAR_U] == 1:
-                self.direction = CHAR_U
-                self.accel_y -= accel_step
-            if self.moving[CHAR_D] == 1:
-                self.direction = CHAR_D
-                self.accel_y += accel_step
-            # limit max speed
-            if abs(self.accel_x) > accel_threshold:
-                if self.accel_x > 0:
-                    self.accel_x = accel_threshold
-                else:
-                    self.accel_x = -accel_threshold
-            if abs(self.accel_y) > accel_threshold:
-                if self.accel_y > 0:
-                    self.accel_y = accel_threshold
-                else:
-                    self.accel_y = -accel_threshold
-            # inertia
-            if not self.moving[CHAR_R] and not self.moving[CHAR_L]:
-                self.accel_x *= accel_fade
-                if abs(self.accel_x) < fade_stop:
-                    self.accel_x = 0
-            if not self.moving[CHAR_U] and not self.moving[CHAR_D]:
-                self.accel_y *= accel_fade
-                if abs(self.accel_y) < fade_stop:
-                    self.accel_y = 0
-            # print(f'player accel: {self.accel_x, self.accel_y}')
-
-            self.x += self.accel_x
-            self.y += self.accel_y
+        if abs(self.accel_x) > accel_threshold:
+            if self.accel_x > 0:
+                self.accel_x = accel_threshold
+            else:
+                self.accel_x = -accel_threshold
+        if abs(self.accel_y) > accel_threshold:
+            if self.accel_y > 0:
+                self.accel_y = accel_threshold
+            else:
+                self.accel_y = -accel_threshold
 
     def shoot(self):
         if self.mp >= SHOT_MP:
