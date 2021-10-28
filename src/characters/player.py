@@ -67,6 +67,8 @@ class Player(BaseCharacter):
         super().update()
         self.move()
         self.collide()
+        print(self.x, self.y)
+        print(self.colliding_blockers)
         self.projectiles_move()
         self.regen()
         self._cooldown()
@@ -90,25 +92,22 @@ class Player(BaseCharacter):
     def collide(self):
         # TODO: FIX BUG WITH DIAGONAL MOVEMENT
         for tile in self.colliding_blockers:
-            if tile.right >= self.rect.left + 1 and self.accel_x < 0:
+            if tile.right >= self.rect.left and self.accel_x < 0:
                 print('LEFT')
                 self.accel_x = 0
                 self.x = self.rect.left + 1
-            if tile.left <= self.rect.right and self.accel_x > 0:
+            elif tile.left <= self.rect.right and self.accel_x > 0:
                 print('RIGHT')
                 self.accel_x = 0
                 self.x = self.rect.right - TILE_SIZE_PX - 1
-
-        for tile in self.colliding_blockers:
-            if tile.top <= self.rect.bottom + 1 and self.accel_y > 0:
+            elif tile.top <= self.rect.bottom and self.accel_y > 0:
                 print('DOWN')
                 self.accel_y = 0
                 self.y = self.rect.top - 1
-            if tile.bottom >= self.rect.top - 1 and self.accel_y < 0:
+            elif tile.bottom >= self.rect.top and self.accel_y < 0:
                 print('UP')
                 self.accel_y = 0
                 self.y = self.rect.bottom - TILE_SIZE_PX + 1
-
         self.collide_with_border()
 
     def collide_with_border(self):
