@@ -3,8 +3,8 @@ import math
 import pygame
 
 from src.characters.base_character import BaseCharacter
-from src.constants import TILE_SIZE_PX, PLAYER_HEIGHT, PLAYER_WIDTH, DEBUG, CHAR_R, CHAR_L, CHAR_U, CHAR_D, \
-    BULLETS_CD, TIME_CD, HP_REGEN, MP_REGEN, SHOT_MP, Colors
+from src.constants import TILE_SIZE_PX, DEBUG, CHAR_R, CHAR_L, CHAR_U, CHAR_D, BULLETS_CD, TIME_CD, \
+    HP_REGEN, MP_REGEN, SHOT_MP, Colors
 from src.gui import GUI
 from src.projectiles import Bullet
 
@@ -35,6 +35,7 @@ class Player(BaseCharacter):
         self.move()
         self.regen()
         self._cooldown()
+        print(self.x, self.y)
 
     def render(self, screen):
         super().render(screen)
@@ -99,7 +100,6 @@ class Player(BaseCharacter):
         if center_y > map_height and moving_y:
             self.y = map_height - tile_center
             self.accel_y = 0
-        # print(self.x, self.y)
 
     def _cooldown(self):
         if self.range_shots_limit == BULLETS_CD:
@@ -153,7 +153,7 @@ class Player(BaseCharacter):
                     if name in ['topleft', 'bottomleft']:
                         print('LEFT')
                         self.accel_x = 0
-                        x_stopped = tile.right + 1
+                        x_stopped = tile.right
                 if tile.left <= self.rect_border.right and self.accel_x > 0:
                     if name in ['topright', 'bottomright']:
                         print('RIGHT')
