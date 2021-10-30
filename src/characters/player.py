@@ -3,7 +3,7 @@ import math
 import pygame
 
 from src.characters.base_character import BaseCharacter
-from src.constants import TILE_SIZE_PX, DEBUG, CHAR_R, CHAR_L, CHAR_U, CHAR_D, BULLETS_CD, TIME_CD, \
+from src.constants import TILE_SIZE_PX, DEBUG, RIGHT, LEFT, TOP, BOTTOM, BULLETS_CD, TIME_CD, \
     HP_REGEN, MP_REGEN, SHOT_MP, Colors
 from src.gui import GUI
 from src.projectiles import Bullet
@@ -66,13 +66,13 @@ class Player(BaseCharacter):
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_d:
-                self.moving[CHAR_R] = 0
+                self.moving[RIGHT] = 0
             if event.key == pygame.K_a:
-                self.moving[CHAR_L] = 0
+                self.moving[LEFT] = 0
             if event.key == pygame.K_w:
-                self.moving[CHAR_U] = 0
+                self.moving[TOP] = 0
             if event.key == pygame.K_s:
-                self.moving[CHAR_D] = 0
+                self.moving[BOTTOM] = 0
 
     def collide_with_map_border(self):
         """
@@ -121,21 +121,21 @@ class Player(BaseCharacter):
         accel_step = 0.05
         if self.can_move:
             # accelerate on keypress
-            if self.moving[CHAR_R]:
-                self.direction = CHAR_R
+            if self.moving[RIGHT]:
+                self.direction = RIGHT
                 self.accel_x += accel_step
-            if self.moving[CHAR_L]:
-                self.direction = CHAR_L
+            if self.moving[LEFT]:
+                self.direction = LEFT
                 self.accel_x -= accel_step
-            if self.moving[CHAR_U]:
-                self.direction = CHAR_U
+            if self.moving[TOP]:
+                self.direction = TOP
                 self.accel_y -= accel_step
-            if self.moving[CHAR_D]:
-                self.direction = CHAR_D
+            if self.moving[BOTTOM]:
+                self.direction = BOTTOM
                 self.accel_y += accel_step
 
             self.collide_with_blockers()
-            self.collide_with_map_border()
+            # self.collide_with_map_border()
             self.fade_speed()
             self.limit_max_speed()
 
@@ -173,23 +173,22 @@ class Player(BaseCharacter):
         self.y += self.accel_y
         self.prev_y = self.y
 
-
     def fade_speed(self):
         accel_fade = 0.95
         fade_stop = 0.001
-        if not self.moving[CHAR_R] and not self.moving[CHAR_L]:
+        if not self.moving[RIGHT] and not self.moving[LEFT]:
             self.accel_x *= accel_fade
             if abs(self.accel_x) < fade_stop:
                 self.accel_x = 0
-        if not self.moving[CHAR_U] and not self.moving[CHAR_D]:
+        if not self.moving[TOP] and not self.moving[BOTTOM]:
             self.accel_y *= accel_fade
             if abs(self.accel_y) < fade_stop:
                 self.accel_y = 0
 
     def limit_max_speed(self):
         accel_threshold = 1
-        moving_x = bool(self.moving[CHAR_R] or self.moving[CHAR_L])
-        moving_y = bool(self.moving[CHAR_U] or self.moving[CHAR_D])
+        moving_x = bool(self.moving[RIGHT] or self.moving[LEFT])
+        moving_y = bool(self.moving[TOP] or self.moving[BOTTOM])
         if moving_x and moving_y:  # diagonal adjustment
             accel_threshold = math.sqrt(2)/2 * accel_threshold
 
@@ -210,16 +209,16 @@ class Player(BaseCharacter):
             if self.range_shots_limit < BULLETS_CD and self.alive:
                 x = self.x
                 y = self.y
-                if self.direction == CHAR_D:
+                if self.direction == BOTTOM:
                     x = self.x + 16
                     y = self.y + 16
-                if self.direction == CHAR_U:
+                if self.direction == TOP:
                     x = self.x + 16
                     y = self.y + 16
-                if self.direction == CHAR_R:
+                if self.direction == RIGHT:
                     x = self.x + 16
                     y = self.y + 16
-                if self.direction == CHAR_L:
+                if self.direction == LEFT:
                     x = self.x + 16
                     y = self.y + 16
                 self.projectile_objects.append(Bullet(x, y, self.direction))

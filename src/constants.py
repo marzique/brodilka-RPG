@@ -20,7 +20,7 @@ CORPSEPACK = 'data/CORPSE.png'
 # texts
 WINDOW_NAME = 'RPG OPEN WORLD!'
 # player movement and position binds
-CHAR_D, CHAR_U, CHAR_R, CHAR_L = (0, 1, 2, 3)
+BOTTOM, TOP, RIGHT, LEFT = (0, 1, 2, 3)
 # Player characteristics
 HP_MAX = 100
 MP_MAX = 100

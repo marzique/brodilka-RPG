@@ -1,6 +1,7 @@
 import pygame
 
-from src.constants import TILE_SIZE_PX, CHAR_R, HP_MAX, MP_MAX, GOLD, CORPSEPACK, Colors, DEBUG
+from src.constants import TILE_SIZE_PX, RIGHT, HP_MAX, MP_MAX, GOLD, CORPSEPACK, Colors, DEBUG, LEFT, TOP, BOTTOM, \
+    HEIGHT, WIDTH
 from src.core.utils import get_topleft
 
 
@@ -14,7 +15,7 @@ class BaseCharacter(pygame.sprite.Sprite):
         self.mp = MP_MAX
         self.level = 1
         self.alive = True
-        self.direction = CHAR_R
+        self.direction = RIGHT
         self.gold = GOLD
         self.moving = [0, 0, 0, 0]
         self.projectile_objects = []
@@ -76,7 +77,13 @@ class BaseCharacter(pygame.sprite.Sprite):
                 projectile.move()
 
     def get_rect_border(self):
-        return pygame.Rect(self.rect.left - 1, self.rect.top - 1, TILE_SIZE_PX + 2, TILE_SIZE_PX + 2)
+        plus_pixels = 3
+        return pygame.Rect(
+            self.rect.left - plus_pixels,
+            self.rect.top - plus_pixels,
+            TILE_SIZE_PX + plus_pixels * 2,
+            TILE_SIZE_PX + plus_pixels * 2
+        )
 
     def render(self, screen):
         self.projectiles_render(screen)
@@ -84,6 +91,7 @@ class BaseCharacter(pygame.sprite.Sprite):
         screen.blit(self.image, coords)
         if DEBUG:
             self.highlight_colliding_tiles(screen)
+            self.render_wasd(screen)
 
     def projectiles_render(self, screen):
         for projectile in self.projectile_objects:
@@ -93,6 +101,36 @@ class BaseCharacter(pygame.sprite.Sprite):
         for x, y in self.get_colliding_tiles_toplefts():
             tile_rect = pygame.Rect(x, y, TILE_SIZE_PX, TILE_SIZE_PX)
             pygame.draw.rect(screen, Colors.RED, tile_rect, 1)
+
+    def render_wasd(self, screen):
+        place_x = WIDTH - 4*TILE_SIZE_PX
+        place_y = HEIGHT - 2*TILE_SIZE_PX
+        size = TILE_SIZE_PX // 2
+        top = pygame.Rect(place_x, place_y, size, size)
+        left = pygame.Rect(place_x - size - 1, place_y + size + 1, size, size)
+        bottom = pygame.Rect(place_x, place_y + size + 1, size, size)
+        right = pygame.Rect(place_x + size + 1, place_y + size + 1, size, size)
+        if self.moving[TOP]:
+            top_color = Colors.RED
+        else:
+            top_color = Colors.WHITE
+        if self.moving[LEFT]:
+            left_color = Colors.RED
+        else:
+            left_color = Colors.WHITE
+        if self.moving[BOTTOM]:
+            bottom_color = Colors.RED
+        else:
+            bottom_color = Colors.WHITE
+        if self.moving[RIGHT]:
+            right_color = Colors.RED
+        else:
+            right_color = Colors.WHITE
+
+        pygame.draw.rect(screen, top_color, top, 1)
+        pygame.draw.rect(screen, left_color, left, 1)
+        pygame.draw.rect(screen, bottom_color, bottom, 1)
+        pygame.draw.rect(screen, right_color, right, 1)
 
     def update_blockers(self):
         blockers = {}
