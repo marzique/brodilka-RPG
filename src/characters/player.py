@@ -134,45 +134,45 @@ class Player(BaseCharacter):
                 self.direction = CHAR_D
                 self.accel_y += accel_step
 
-            x_stopped, y_stopped = self.collide_with_blockers()
-            self.x = x_stopped or self.x + self.accel_x
-            self.y = y_stopped or self.y + self.accel_y
+            self.collide_with_blockers()
             self.collide_with_map_border()
             self.fade_speed()
             self.limit_max_speed()
 
     def collide_with_blockers(self):
-        self.prev_x = self.x
-        self.prev_y = self.y
-        x_stopped = None
-        y_stopped = None
         for name, tile in self.colliding_blockers.items():
             # print(self.colliding_blockers)
             on_the_same_line = self.map_level.on_the_same_line(tile, self)
-            in_the_same_row = self.map_level.in_the_same_row(tile, self)
             if on_the_same_line:
                 if tile.right >= self.rect_border.left and self.accel_x < 0:
                     if name in ['topleft', 'bottomleft']:
                         print('LEFT')
                         self.accel_x = 0
-                        x_stopped = self.prev_x
+                        self.x = self.prev_x
                 if tile.left <= self.rect_border.right and self.accel_x > 0:
                     if name in ['topright', 'bottomright']:
                         print('RIGHT')
                         self.accel_x = 0
-                        x_stopped = self.prev_x
+                        self.x = self.prev_x
+        self.x += self.accel_x
+        self.prev_x = self.x
+
+        for name, tile in self.colliding_blockers.items():
+            in_the_same_row = self.map_level.in_the_same_row(tile, self)
             if in_the_same_row:
                 if tile.top <= self.rect_border.bottom and self.accel_y > 0:
                     if name in ['bottomleft', 'bottomright']:
                         print('DOWN')
                         self.accel_y = 0
-                        y_stopped = self.prev_y
+                        self.y = self.prev_y
                 if tile.bottom >= self.rect_border.top and self.accel_y < 0:
                     if name in ['topleft', 'topright']:
                         print('UP')
                         self.accel_y = 0
-                        y_stopped = self.prev_y
-        return x_stopped, y_stopped
+                        self.y = self.prev_y
+        self.y += self.accel_y
+        self.prev_y = self.y
+
 
     def fade_speed(self):
         accel_fade = 0.95
