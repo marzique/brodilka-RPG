@@ -15,8 +15,8 @@ class Player(BaseCharacter):
         self.range_shots_limit = 0  # shoots after cooldown
         self.cooldown_time = 0  # msec
         self.interface = GUI(self)
-        self.accel_x = 0
-        self.accel_y = 0
+        self.prev_x = self.x
+        self.prev_y = self.y
 
     def process_input(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -142,6 +142,8 @@ class Player(BaseCharacter):
             self.limit_max_speed()
 
     def collide_with_blockers(self):
+        self.prev_x = self.x
+        self.prev_y = self.y
         x_stopped = None
         y_stopped = None
         for name, tile in self.colliding_blockers.items():
@@ -153,23 +155,23 @@ class Player(BaseCharacter):
                     if name in ['topleft', 'bottomleft']:
                         print('LEFT')
                         self.accel_x = 0
-                        x_stopped = tile.right
+                        x_stopped = self.prev_x
                 if tile.left <= self.rect_border.right and self.accel_x > 0:
                     if name in ['topright', 'bottomright']:
                         print('RIGHT')
                         self.accel_x = 0
-                        x_stopped = tile.left - TILE_SIZE_PX
+                        x_stopped = self.prev_x
             if in_the_same_row:
                 if tile.top <= self.rect_border.bottom and self.accel_y > 0:
                     if name in ['bottomleft', 'bottomright']:
                         print('DOWN')
                         self.accel_y = 0
-                        y_stopped = tile.top - TILE_SIZE_PX
+                        y_stopped = self.prev_y
                 if tile.bottom >= self.rect_border.top and self.accel_y < 0:
                     if name in ['topleft', 'topright']:
                         print('UP')
                         self.accel_y = 0
-                        y_stopped = tile.bottom
+                        y_stopped = self.prev_y
         return x_stopped, y_stopped
 
     def fade_speed(self):

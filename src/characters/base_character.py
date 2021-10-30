@@ -23,6 +23,8 @@ class BaseCharacter(pygame.sprite.Sprite):
         self.load_character_sprites()
         self.image = self.charpack_list[self.direction]
         self.rect = self.image.get_rect(topleft=(self.x, self.y))
+        self.accel_x = 0
+        self.accel_y = 0
         self.rect_border = self.get_rect_border()
         self.colliding_blockers = {}
         self.can_move = True
