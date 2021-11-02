@@ -26,7 +26,6 @@ class BaseCharacter(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=(self.x, self.y))
         self.accel_x = 0
         self.accel_y = 0
-        self.rect_border = self.get_rect_border()
         self.can_move = True
 
     def load_character_sprites(self):
@@ -66,7 +65,6 @@ class BaseCharacter(pygame.sprite.Sprite):
             sub_dict = self.corpsepack_list
         self.image = sub_dict[self.direction]
         self.rect = self.image.get_rect(topleft=(self.x, self.y))
-        self.rect_border = self.get_rect_border()
 
     def projectiles_move(self):
         for projectile in self.projectile_objects:
@@ -75,35 +73,21 @@ class BaseCharacter(pygame.sprite.Sprite):
             else:
                 projectile.move()
 
-    def get_rect_border(self):
-        plus_pixels = 3
-        return pygame.Rect(
-            self.rect.left - plus_pixels,
-            self.rect.top - plus_pixels,
-            TILE_SIZE_PX + plus_pixels * 2,
-            TILE_SIZE_PX + plus_pixels * 2
-        )
-
     def render(self, screen):
         self.projectiles_render(screen)
         coords = (self.x, self.y)
         screen.blit(self.image, coords)
         if DEBUG:
-            self.highlight_colliding_tiles(screen)
             self.render_wasd(screen)
 
     def projectiles_render(self, screen):
         for projectile in self.projectile_objects:
             projectile.render(screen)
 
-    def highlight_colliding_tiles(self, screen):
-        for x, y in self.get_colliding_tiles_toplefts():
-            tile_rect = pygame.Rect(x, y, TILE_SIZE_PX, TILE_SIZE_PX)
-            pygame.draw.rect(screen, Colors.RED, tile_rect, 1)
-
-    def render_wasd(self, screen):
-        place_x = WIDTH - 4*TILE_SIZE_PX
-        place_y = HEIGHT - 2*TILE_SIZE_PX
+    def render_wasd(self, screen) -> None:
+        """Draw WASD keys and show which of them are currently pressed."""
+        place_x = WIDTH - 4 * TILE_SIZE_PX
+        place_y = HEIGHT - 2 * TILE_SIZE_PX
         size = TILE_SIZE_PX // 2
         top = pygame.Rect(place_x, place_y, size, size)
         left = pygame.Rect(place_x - size - 1, place_y + size + 1, size, size)
@@ -130,16 +114,6 @@ class BaseCharacter(pygame.sprite.Sprite):
         pygame.draw.rect(screen, left_color, left, 1)
         pygame.draw.rect(screen, bottom_color, bottom, 1)
         pygame.draw.rect(screen, right_color, right, 1)
-
-    def get_colliding_tiles_toplefts(self):
-        x, y = get_topleft(self.x, self.y)
-        corners = [
-            (x, y),
-            (x + TILE_SIZE_PX, y),
-            (x, y + TILE_SIZE_PX),
-            (x + TILE_SIZE_PX, y + TILE_SIZE_PX)
-        ]
-        return corners
 
     def kill(self):
         self.alive = self.can_move = False

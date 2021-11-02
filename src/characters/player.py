@@ -40,8 +40,6 @@ class Player(BaseCharacter):
         if DEBUG:
             # player rect
             pygame.draw.rect(screen, Colors.GOLD, self.rect, 1)
-            # player rect border
-            pygame.draw.rect(screen, Colors.LTBLUE, self.rect_border, 1)
 
     def _process_wasd(self, event):
         """

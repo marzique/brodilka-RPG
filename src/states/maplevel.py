@@ -44,14 +44,11 @@ class MapLevel(BaseState):
         self.player.update()
 
     def is_blocker(self, x, y):
-        tile_properties = {}
         try:
             tile_properties = self.tilemap.get_tile_properties(x, y, 0) or {}
-        except ValueError:
-            tile_properties = {}
-        finally:
             if tile_properties.get('type') == TileTypes.BLOCKER:
                 return True
+        except ValueError:
             return False
 
     @staticmethod
