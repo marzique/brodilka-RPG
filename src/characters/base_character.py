@@ -27,7 +27,6 @@ class BaseCharacter(pygame.sprite.Sprite):
         self.accel_x = 0
         self.accel_y = 0
         self.rect_border = self.get_rect_border()
-        self.colliding_blockers = {}
         self.can_move = True
 
     def load_character_sprites(self):
@@ -131,15 +130,6 @@ class BaseCharacter(pygame.sprite.Sprite):
         pygame.draw.rect(screen, left_color, left, 1)
         pygame.draw.rect(screen, bottom_color, bottom, 1)
         pygame.draw.rect(screen, right_color, right, 1)
-
-    def update_blockers(self):
-        blockers = {}
-        names = ['topleft', 'topright', 'bottomleft', 'bottomright']
-        for i, coords in enumerate(self.get_colliding_tiles_toplefts()):
-            if self.map_level.is_blocker(*coords):
-                tile_rect = pygame.Rect(*coords, TILE_SIZE_PX, TILE_SIZE_PX)
-                blockers[names[i]] = tile_rect
-        self.colliding_blockers = blockers
 
     def get_colliding_tiles_toplefts(self):
         x, y = get_topleft(self.x, self.y)

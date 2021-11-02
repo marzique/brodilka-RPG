@@ -1,5 +1,3 @@
-import math
-
 import pygame
 
 from src.characters.base_character import BaseCharacter
@@ -31,7 +29,6 @@ class Player(BaseCharacter):
 
     def update(self):
         super().update()
-        self.update_blockers()
         self.move()
         self.regen()
         self._cooldown()
@@ -134,44 +131,34 @@ class Player(BaseCharacter):
                 self.direction = BOTTOM
                 self.accel_y += accel_step
 
-            self.collide_with_blockers()
-            # self.collide_with_map_border()
+            self.x += self.accel_x
+            self.y += self.accel_y
+            self.rect.x = self.x
+            self.collide_with_walls('x')
+            self.rect.y = self.y
+            self.collide_with_walls('y')
+
             self.fade_speed()
             self.limit_max_speed()
 
-    def collide_with_blockers(self):
-        for name, tile in self.colliding_blockers.items():
-            # print(self.colliding_blockers)
-            on_the_same_line = self.map_level.on_the_same_line(tile, self)
-            if on_the_same_line:
-                if tile.right >= self.rect_border.left and self.accel_x < 0:
-                    if name in ['topleft', 'bottomleft']:
-                        print('LEFT')
-                        self.accel_x = 0
-                        self.x = self.prev_x
-                if tile.left <= self.rect_border.right and self.accel_x > 0:
-                    if name in ['topright', 'bottomright']:
-                        print('RIGHT')
-                        self.accel_x = 0
-                        self.x = self.prev_x
-        self.x += self.accel_x
-        self.prev_x = self.x
-
-        for name, tile in self.colliding_blockers.items():
-            in_the_same_row = self.map_level.in_the_same_row(tile, self)
-            if in_the_same_row:
-                if tile.top <= self.rect_border.bottom and self.accel_y > 0:
-                    if name in ['bottomleft', 'bottomright']:
-                        print('DOWN')
-                        self.accel_y = 0
-                        self.y = self.prev_y
-                if tile.bottom >= self.rect_border.top and self.accel_y < 0:
-                    if name in ['topleft', 'topright']:
-                        print('UP')
-                        self.accel_y = 0
-                        self.y = self.prev_y
-        self.y += self.accel_y
-        self.prev_y = self.y
+    def collide_with_walls(self, direction):
+        blockers = pygame.sprite.spritecollide(self, self.map_level.blockers, False)
+        if direction == 'x':
+            if blockers:
+                if self.accel_x > 0:
+                    self.x = blockers[0].rect.left - self.rect.width
+                if self.accel_x < 0:
+                    self.x = blockers[0].rect.right
+                self.accel_x = 0
+                self.rect.x = self.x
+        if direction == 'y':
+            if blockers:
+                if self.accel_y > 0:
+                    self.y = blockers[0].rect.top - self.rect.height
+                if self.accel_y < 0:
+                    self.y = blockers[0].rect.bottom
+                self.accel_y = 0
+                self.rect.y = self.y
 
     def fade_speed(self):
         accel_fade = 0.95
@@ -190,7 +177,7 @@ class Player(BaseCharacter):
         moving_x = bool(self.moving[RIGHT] or self.moving[LEFT])
         moving_y = bool(self.moving[TOP] or self.moving[BOTTOM])
         if moving_x and moving_y:  # diagonal adjustment
-            accel_threshold = math.sqrt(2)/2 * accel_threshold
+            accel_threshold *= 0.7071
 
         if abs(self.accel_x) > accel_threshold:
             if self.accel_x > 0:
