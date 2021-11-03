@@ -5,7 +5,7 @@ from pygame.examples.joystick import WHITE
 from pytmx import load_pygame
 
 from src.characters import Player, BaseCharacter
-from src.constants import TILE_SIZE_PX, DEBUG, TileTypes, WIDTH, HEIGHT
+from src.constants import TILE_SIZE_PX, DEBUG, TileTypes, WIDTH, HEIGHT, Colors
 from src.core.utils import debug
 from src.sprites import Blocker, Tile
 from src.states.base_state import BaseState
@@ -68,19 +68,20 @@ class MapLevel(BaseState):
         self.player.render(screen)
 
     def render_tilemap(self, screen):
-        self.all_tiles.draw(screen)
 
         # scrolling map (FIXME: blockers not moving)
-        # for sprite in self.all_tiles:
-        #     screen.blit(sprite.image, self.camera.apply_offset(sprite))
-        self.render_grid(screen)
+        for sprite in self.all_tiles:
+            screen.blit(sprite.image, self.camera.apply_offset(sprite))
+        self.draw_player_border(screen)
 
     @debug
-    def render_grid(self, screen):
-        for x in range(0, WIDTH, TILE_SIZE_PX):
-            pygame.draw.line(screen, WHITE, (x, 0), (x, HEIGHT))
-        for y in range(0, HEIGHT, TILE_SIZE_PX):
-            pygame.draw.line(screen, WHITE, (0, y), (WIDTH, y))
+    def draw_player_border(self, screen):
+        for sprite in self.all_tiles:
+            if self.is_blocker(sprite.rect.x // 32, sprite.rect.y // 32):
+                color = Colors.RED
+            else:
+                color = Colors.WHITE
+            pygame.draw.rect(screen, color, sprite.rect, 1)
 
 
 class Camera:
