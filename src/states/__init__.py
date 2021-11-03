@@ -2,9 +2,8 @@ from .menu import MainMenu
 from .maplevel import MapLevel
 
 
-# String mapping of all game states.
-# TODO: refactor
-def get_state(name):
+def state_factory(name):
+    """Return state class by name"""
     states = {
         'MainMenu': MainMenu(),
         'Dungeon': MapLevel('level1')
@@ -12,4 +11,4 @@ def get_state(name):
     return states[name]
 
 
-__all__ = ['get_state', 'MainMenu', 'MapLevel']
+__all__ = ['state_factory', 'MainMenu', 'MapLevel']

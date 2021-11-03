@@ -3,6 +3,7 @@ import pygame
 from src.characters.base_character import BaseCharacter
 from src.constants import TILE_SIZE_PX, DEBUG, RIGHT, LEFT, TOP, BOTTOM, BULLETS_CD, TIME_CD, \
     HP_REGEN, MP_REGEN, SHOT_MP, Colors
+from src.core.utils import debug
 from src.gui import GUI
 from src.projectiles import Bullet
 
@@ -15,6 +16,8 @@ class Player(BaseCharacter):
         self.interface = GUI(self)
         self.prev_x = self.x
         self.prev_y = self.y
+        self.accel_step = 0.05
+
 
     def process_input(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -37,9 +40,11 @@ class Player(BaseCharacter):
     def render(self, screen):
         super().render(screen)
         self.interface.render(screen)
-        if DEBUG:
-            # player rect
-            pygame.draw.rect(screen, Colors.GOLD, self.rect, 1)
+        self.draw_player_border(screen)
+
+    @debug
+    def draw_player_border(self, screen):
+        pygame.draw.rect(screen, Colors.GOLD, self.rect, 1)
 
     def _process_wasd(self, event):
         """
@@ -113,21 +118,20 @@ class Player(BaseCharacter):
 
     def move(self):
         """Update x and y of the player"""
-        accel_step = 0.05
         if self.can_move:
             # accelerate on keypress
             if self.moving[RIGHT]:
                 self.direction = RIGHT
-                self.accel_x += accel_step
+                self.accel_x += self.accel_step
             if self.moving[LEFT]:
                 self.direction = LEFT
-                self.accel_x -= accel_step
+                self.accel_x -= self.accel_step
             if self.moving[TOP]:
                 self.direction = TOP
-                self.accel_y -= accel_step
+                self.accel_y -= self.accel_step
             if self.moving[BOTTOM]:
                 self.direction = BOTTOM
-                self.accel_y += accel_step
+                self.accel_y += self.accel_step
 
             self.x += self.accel_x
             self.y += self.accel_y
@@ -135,9 +139,8 @@ class Player(BaseCharacter):
             self.collide_with_walls('x')
             self.rect.y = self.y
             self.collide_with_walls('y')
-
-            self.fade_speed()
             self.limit_max_speed()
+            self.fade_speed()
 
     def collide_with_walls(self, direction):
         blockers = pygame.sprite.spritecollide(self, self.map_level.blockers, False)
@@ -176,7 +179,6 @@ class Player(BaseCharacter):
         moving_y = bool(self.moving[TOP] or self.moving[BOTTOM])
         if moving_x and moving_y:  # diagonal adjustment
             accel_threshold *= 0.7071
-
         if abs(self.accel_x) > accel_threshold:
             if self.accel_x > 0:
                 self.accel_x = accel_threshold

@@ -1,38 +1,47 @@
 import os
 
 import pygame
+from pygame.examples.joystick import WHITE
 from pytmx import load_pygame
 
 from src.characters import Player, BaseCharacter
-from src.constants import TILE_SIZE_PX, DEBUG, TileTypes
-from src.core.utils import draw_outline
-from src.sprites import Blocker
+from src.constants import TILE_SIZE_PX, DEBUG, TileTypes, WIDTH, HEIGHT
+from src.core.utils import debug
+from src.sprites import Blocker, Tile
 from src.states.base_state import BaseState
 
 
 class MapLevel(BaseState):
-    """Base class for all game levels a.k.a. maps."""
     def __init__(self, name):
         super().__init__()
+        self.game = None  # will be set inside Control class
         self.name = name
         self.tilemap = self.load_tilemap(name)
         self.player = Player('Tester', coords=(50, 150), map_level=self)
+        self.all_tiles = pygame.sprite.Group()
         self.blockers = pygame.sprite.Group()
-        self.setup_blockers()
+        self.setup_tiles()
+        self.width = self.tilemap.width * TILE_SIZE_PX
+        self.height = self.tilemap.height * TILE_SIZE_PX
+        self.camera = Camera(self.width, self.height)
 
     @staticmethod
     def load_tilemap(name):
         path = os.path.join(os.getcwd(), 'data', 'tilesheets', f'{name}.tmx')
         tilemap = load_pygame(path)
         return tilemap
-
-    def setup_blockers(self):
+    
+    def setup_tiles(self):
         """Create blocker sprites and add them to blockers group"""
         blockers = []
+        all_tiles = []
         for layer in self.tilemap.layers:
+            print(list(layer.tiles()))
             for x, y, image in layer.tiles():
+                all_tiles.append(Tile(image, x, y))
                 if self.is_blocker(x, y):
                     blockers.append(Blocker(image, x, y))
+        self.all_tiles.add(*all_tiles)
         self.blockers.add(*blockers)
 
     def process_input(self, event):
@@ -41,26 +50,17 @@ class MapLevel(BaseState):
 
     def update(self):
         super().update()
+        self.blockers.update()
         self.player.update()
+        self.camera.update(self.player)
 
-    def is_blocker(self, x, y):
+    def is_blocker(self, x: int, y: int) -> bool:
         try:
             tile_properties = self.tilemap.get_tile_properties(x, y, 0) or {}
             if tile_properties.get('type') == TileTypes.BLOCKER:
                 return True
         except ValueError:
             return False
-
-    @staticmethod
-    def on_the_same_line(tile: pygame.Rect, player: BaseCharacter):
-        if tile.center[1] - player.rect.center[1] < (TILE_SIZE_PX // 2):
-            return True
-        return False
-
-    @staticmethod
-    def in_the_same_row(tile: pygame.Rect, player: BaseCharacter):
-        if tile.center[0] - player.rect.center[0] < (TILE_SIZE_PX // 2):
-            return True
         return False
 
     def render(self, screen):
@@ -68,9 +68,37 @@ class MapLevel(BaseState):
         self.player.render(screen)
 
     def render_tilemap(self, screen):
-        for layer in self.tilemap.layers:
-            for x, y, image in layer.tiles():
-                topleft = (x * TILE_SIZE_PX, y * TILE_SIZE_PX)
-                screen.blit(image, topleft)
-                if DEBUG:
-                    draw_outline(screen, image, topleft)
+        self.all_tiles.draw(screen)
+
+        # scrolling map (FIXME: blockers not moving)
+        # for sprite in self.all_tiles:
+        #     screen.blit(sprite.image, self.camera.apply_offset(sprite))
+        self.render_grid(screen)
+
+    @debug
+    def render_grid(self, screen):
+        for x in range(0, WIDTH, TILE_SIZE_PX):
+            pygame.draw.line(screen, WHITE, (x, 0), (x, HEIGHT))
+        for y in range(0, HEIGHT, TILE_SIZE_PX):
+            pygame.draw.line(screen, WHITE, (0, y), (WIDTH, y))
+
+
+class Camera:
+    def __init__(self, width, height):
+        self.camera = pygame.Rect(0, 0, width, height)
+        self.width = width
+        self.height = height
+
+    def apply_offset(self, entity):
+        return entity.rect.move(self.camera.topleft)
+
+    def update(self, target):
+        x = int(WIDTH / 2) - target.rect.x
+        y = int(HEIGHT / 2) - target.rect.y
+
+        # limit scrolling to map size
+        x = min(0, x)  # left
+        y = min(0, y)  # top
+        x = max(-(self.width - WIDTH), x)  # right
+        y = max(-(self.height - HEIGHT), y)  # bottom
+        self.camera = pygame.Rect(x, y, self.width, self.height)

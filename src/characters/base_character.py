@@ -2,7 +2,7 @@ import pygame
 
 from src.constants import TILE_SIZE_PX, RIGHT, HP_MAX, MP_MAX, GOLD, CORPSEPACK, Colors, DEBUG, LEFT, TOP, BOTTOM, \
     HEIGHT, WIDTH
-from src.core.utils import get_topleft
+from src.core.utils import get_topleft, debug
 
 
 class BaseCharacter(pygame.sprite.Sprite):
@@ -64,7 +64,6 @@ class BaseCharacter(pygame.sprite.Sprite):
         else:
             sub_dict = self.corpsepack_list
         self.image = sub_dict[self.direction]
-        self.rect = self.image.get_rect(topleft=(self.x, self.y))
 
     def projectiles_move(self):
         for projectile in self.projectile_objects:
@@ -77,13 +76,13 @@ class BaseCharacter(pygame.sprite.Sprite):
         self.projectiles_render(screen)
         coords = (self.x, self.y)
         screen.blit(self.image, coords)
-        if DEBUG:
-            self.render_wasd(screen)
+        self.render_wasd(screen)
 
     def projectiles_render(self, screen):
         for projectile in self.projectile_objects:
             projectile.render(screen)
 
+    @debug
     def render_wasd(self, screen) -> None:
         """Draw WASD keys and show which of them are currently pressed."""
         place_x = WIDTH - 4 * TILE_SIZE_PX

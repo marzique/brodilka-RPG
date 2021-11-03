@@ -4,7 +4,7 @@ from pygame import DOUBLEBUF, QUIT
 from pygame.constants import HWSURFACE
 
 from .constants import WIDTH, HEIGHT
-from .states import get_state
+from .states import state_factory
 
 
 class Control:
@@ -16,7 +16,8 @@ class Control:
         self.running = True
         self.fps = 144
         self.clock = pygame.time.Clock()
-        self.state = get_state('Dungeon')
+        self.state = state_factory('Dungeon')
+        self.state.game = self
 
     def main_loop(self):
         """
@@ -26,10 +27,10 @@ class Control:
         3) render state to the screen
         """
         while self.running:
+            self.dt = self.clock.tick(self.fps) / 1000
             self.process_input()
             self.update()
             self.render()
-            self.clock.tick(self.fps)
 
     def process_input(self):
         for event in pygame.event.get():
@@ -46,4 +47,4 @@ class Control:
 
     def render(self):
         self.state.render(self.screen)
-        pygame.display.update()
+        pygame.display.flip()
