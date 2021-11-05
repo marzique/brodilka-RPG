@@ -1,17 +1,17 @@
 import os
 
 import pygame
-from pygame.examples.joystick import WHITE
 from pytmx import load_pygame
 
-from src.characters import Player, BaseCharacter
-from src.constants import TILE_SIZE_PX, DEBUG, TileTypes, WIDTH, HEIGHT, Colors
+from src.characters import Player
+from src.constants import TILE_SIZE_PX, TileTypes, WIDTH, HEIGHT, Colors
 from src.core.utils import debug
 from src.sprites import Blocker, Tile
 from src.states.base_state import BaseState
 
 
 class MapLevel(BaseState):
+    """State that represents game level."""
     def __init__(self, name):
         super().__init__()
         self.game = None  # will be set inside Control class
@@ -24,15 +24,17 @@ class MapLevel(BaseState):
         self.width = self.tilemap.width * TILE_SIZE_PX
         self.height = self.tilemap.height * TILE_SIZE_PX
         self.camera = Camera(self.width, self.height)
+        self.canvas = pygame.Surface((self.width, self.height))
 
     @staticmethod
     def load_tilemap(name):
+        """Load *.tmx map data"""
         path = os.path.join(os.getcwd(), 'data', 'tilesheets', f'{name}.tmx')
         tilemap = load_pygame(path)
         return tilemap
     
     def setup_tiles(self):
-        """Create blocker sprites and add them to blockers group"""
+        """Create sprite for each tile and store them in groups"""
         blockers = []
         all_tiles = []
         for layer in self.tilemap.layers:
@@ -55,6 +57,7 @@ class MapLevel(BaseState):
         self.camera.update(self.player)
 
     def is_blocker(self, x: int, y: int) -> bool:
+        """Checks if a tile with these coordinates is a wall or not."""
         try:
             tile_properties = self.tilemap.get_tile_properties(x, y, 0) or {}
             if tile_properties.get('type') == TileTypes.BLOCKER:
@@ -64,16 +67,18 @@ class MapLevel(BaseState):
         return False
 
     def render(self, screen):
-        self.render_tilemap(screen)
-        self.player.render(screen)
+        """Draws everything onto canvas, shifts canvas position to make player centered and draws canvas onto screen."""
+        self.render_tilemap(self.canvas)
+        self.player.render(self.canvas)
+        self.camera.scroll_canvas(self.canvas)
+        screen.blit(self.canvas, self.canvas.get_rect())
 
     def render_tilemap(self, screen):
-        for sprite in self.all_tiles:
-            screen.blit(sprite.image, sprite)
-        self.draw_player_border(screen)
+        self.all_tiles.draw(screen)
+        self.draw_tile_borders(screen)
 
     @debug
-    def draw_player_border(self, screen):
+    def draw_tile_borders(self, screen):
         for sprite in self.all_tiles:
             if self.is_blocker(sprite.rect.x // 32, sprite.rect.y // 32):
                 color = Colors.RED
@@ -83,15 +88,18 @@ class MapLevel(BaseState):
 
 
 class Camera:
+    """Class that implements scrolling map feature that follows Player rect."""
     def __init__(self, width, height):
         self.camera = pygame.Rect(0, 0, width, height)
         self.width = width
         self.height = height
 
-    def apply_offset(self, canvas):
+    def scroll_canvas(self, canvas):
+        """Scroll canvas by offset"""
         return canvas.scroll(*self.camera.topleft)
 
     def update(self, target):
+        """Calculate offset of the camera."""
         x = int(WIDTH / 2) - target.rect.x
         y = int(HEIGHT / 2) - target.rect.y
 
