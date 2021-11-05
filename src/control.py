@@ -1,6 +1,6 @@
 import pygame
 
-from pygame import DOUBLEBUF, QUIT
+from pygame import DOUBLEBUF, QUIT, Surface
 from pygame.constants import HWSURFACE
 
 from .constants import WIDTH, HEIGHT
@@ -18,6 +18,7 @@ class Control:
         self.clock = pygame.time.Clock()
         self.state = state_factory('Dungeon')
         self.state.game = self
+        self.canvas = Surface((self.state.width, self.state.height))
 
     def main_loop(self):
         """
@@ -46,5 +47,7 @@ class Control:
         self.state.update()
 
     def render(self):
-        self.state.render(self.screen)
+        self.state.render(self.canvas)
+        self.state.camera.apply_offset(self.canvas)
+        self.screen.blit(self.canvas, self.canvas.get_rect())
         pygame.display.flip()

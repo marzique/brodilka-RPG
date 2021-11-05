@@ -68,10 +68,8 @@ class MapLevel(BaseState):
         self.player.render(screen)
 
     def render_tilemap(self, screen):
-
-        # scrolling map (FIXME: blockers not moving)
         for sprite in self.all_tiles:
-            screen.blit(sprite.image, self.camera.apply_offset(sprite))
+            screen.blit(sprite.image, sprite)
         self.draw_player_border(screen)
 
     @debug
@@ -90,8 +88,8 @@ class Camera:
         self.width = width
         self.height = height
 
-    def apply_offset(self, entity):
-        return entity.rect.move(self.camera.topleft)
+    def apply_offset(self, canvas):
+        return canvas.scroll(*self.camera.topleft)
 
     def update(self, target):
         x = int(WIDTH / 2) - target.rect.x
