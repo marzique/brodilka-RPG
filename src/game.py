@@ -8,7 +8,7 @@ from .states import state_factory
 from .states.base_state import BaseState
 
 
-class Control:
+class Game:
     """Main class of the game that implements game loop pattern."""
     WINDOW_SETTINGS = pygame.SCALED | HWSURFACE | DOUBLEBUF  # | pygame.NOFRAME
 

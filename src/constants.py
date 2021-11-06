@@ -54,7 +54,3 @@ class Fonts:
     regular = 'data/fonts/Ubuntu-Regular.ttf'
     light = 'data/fonts/Ubuntu-Regular.ttf'
     bold = 'data/fonts/Ubuntu-Bold.ttf'
-
-
-class TileTypes:
-    WALL = 'blocker'

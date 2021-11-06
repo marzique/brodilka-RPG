@@ -139,21 +139,21 @@ class Player(BaseCharacter):
             self.collide_with_map_border()
 
     def collide_with_walls(self, direction):
-        blockers = pygame.sprite.spritecollide(self, self.map_level.walls, False)
+        walls = pygame.sprite.spritecollide(self, self.map_level.walls, False)
         if direction == 'x':
-            if blockers:
+            if walls:
                 if self.accel_x > 0:
-                    self.x = blockers[0].rect.left - self.rect.width
+                    self.x = walls[0].rect.left - self.rect.width
                 if self.accel_x < 0:
-                    self.x = blockers[0].rect.right
+                    self.x = walls[0].rect.right
                 self.accel_x = 0
                 self.rect.x = self.x
         if direction == 'y':
-            if blockers:
+            if walls:
                 if self.accel_y > 0:
-                    self.y = blockers[0].rect.top - self.rect.height
+                    self.y = walls[0].rect.top - self.rect.height
                 if self.accel_y < 0:
-                    self.y = blockers[0].rect.bottom
+                    self.y = walls[0].rect.bottom
                 self.accel_y = 0
                 self.rect.y = self.y
 

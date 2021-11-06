@@ -73,12 +73,12 @@ class MapLevel(BaseState):
 
     @debug
     def draw_tile_borders(self, screen):
-        for sprite in self.all_tiles:
-            if sprite.is_wall:
+        for tile in self.all_tiles:
+            if tile.is_wall:
                 color = Colors.RED
             else:
                 color = Colors.WHITE
-            pygame.draw.rect(screen, color, sprite.rect, 1)
+            pygame.draw.rect(screen, color, tile.rect, 1)
 
 
 class Camera:
