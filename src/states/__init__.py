@@ -6,7 +6,7 @@ def state_factory(name, **kwargs):
     """Return state class by name"""
     states = {
         'MainMenu': MainMenu(),
-        'Dungeon': MapLevel('level1', **kwargs)
+        'Dungeon': MapLevel('start_level', **kwargs)
     }
     return states[name]
 

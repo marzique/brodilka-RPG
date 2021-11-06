@@ -5,10 +5,10 @@ from pygame import Surface
 from pytmx import load_pygame, TiledMap
 
 from src.characters import Player
-from src.constants import TILE_SIZE_PX, TileTypes, WIDTH, HEIGHT, Colors
+from src.constants import TILE_SIZE_PX, WIDTH, HEIGHT, Colors
 from src.core.utils import debug
 from src.gui import GUI
-from src.sprites import Blocker, Tile
+from src.sprites import Tile
 from src.states.base_state import BaseState
 
 
@@ -21,7 +21,7 @@ class MapLevel(BaseState):
         self.tilemap: TiledMap = self.load_tilemap(name)
         self.player = Player('Tester', coords=(50, 150), map_level=self)
         self.all_tiles = pygame.sprite.Group()
-        self.blockers = pygame.sprite.Group()
+        self.walls = pygame.sprite.Group()
         self.setup_tiles()
         self.width: int = self.tilemap.width * TILE_SIZE_PX
         self.height: int = self.tilemap.height * TILE_SIZE_PX
@@ -38,16 +38,13 @@ class MapLevel(BaseState):
     
     def setup_tiles(self) -> None:
         """Create sprite for each tile and store them in groups"""
-        blockers = []
-        all_tiles = []
-        for layer in self.tilemap.layers:
-            print(list(layer.tiles()))
+        for i, layer in enumerate(self.tilemap.layers):
             for x, y, image in layer.tiles():
-                all_tiles.append(Tile(image, x, y))
-                if self.is_blocker(x, y):
-                    blockers.append(Blocker(image, x, y))
-        self.all_tiles.add(*all_tiles)
-        self.blockers.add(*blockers)
+                kwargs = self.tilemap.get_tile_properties(x, y, i) or {}
+                tile = Tile(image, x, y, **kwargs)
+                self.all_tiles.add(tile)
+                if tile.is_wall:
+                    self.walls.add(tile)
 
     def process_input(self, event):
         super().process_input(event)
@@ -55,23 +52,12 @@ class MapLevel(BaseState):
 
     def update(self):
         super().update()
-        self.blockers.update()
         self.player.update()
         self.camera.update(self.player)
         self.update_player_offset()
 
     def update_player_offset(self):
         self.player.offset = self.camera.rect.topleft
-
-    def is_blocker(self, x: int, y: int) -> bool:
-        """Checks if a tile with these coordinates is a wall or not."""
-        try:
-            tile_properties = self.tilemap.get_tile_properties(x, y, 0) or {}
-            if tile_properties.get('type') == TileTypes.BLOCKER:
-                return True
-        except ValueError:
-            return False
-        return False
 
     def render(self, screen):
         """Draws everything onto canvas, shifts canvas position to make player centered and draws canvas onto screen."""
@@ -88,7 +74,7 @@ class MapLevel(BaseState):
     @debug
     def draw_tile_borders(self, screen):
         for sprite in self.all_tiles:
-            if self.is_blocker(sprite.rect.x // 32, sprite.rect.y // 32):
+            if sprite.is_wall:
                 color = Colors.RED
             else:
                 color = Colors.WHITE

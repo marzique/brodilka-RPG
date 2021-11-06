@@ -19,8 +19,7 @@ class AnimatedSprite(BaseSprite):
 
 
 class Tile(BaseSprite):
-    pass
-
-
-class Blocker(Tile):
-    pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args)
+        self.id = kwargs.get('id')
+        self.is_wall = kwargs.get('wall', False)
