@@ -4,20 +4,16 @@ from src.characters.base_character import BaseCharacter
 from src.constants import TILE_SIZE_PX, DEBUG, RIGHT, LEFT, TOP, BOTTOM, BULLETS_CD, TIME_CD, \
     HP_REGEN, MP_REGEN, SHOT_MP, Colors
 from src.core.utils import debug
-from src.gui import GUI
 from src.projectiles import Bullet
 
 
 class Player(BaseCharacter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.range_shots_limit = 0  # shoots after cooldown
-        self.cooldown_time = 0  # msec
-        self.interface = GUI(self)
-        self.prev_x = self.x
-        self.prev_y = self.y
-        self.accel_step = 0.05
-
+        self.range_shots_limit: int = 0  # shoots after cooldown
+        self.cooldown_time: int = 0  # msec
+        self.accel_step: float = 0.05
+        self.offset: tuple = (0, 0)
 
     def process_input(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -37,10 +33,9 @@ class Player(BaseCharacter):
         self._cooldown()
         print(self.x, self.y)
 
-    def render(self, screen):
-        super().render(screen)
-        self.interface.render(screen)
-        self.draw_player_border(screen)
+    def render(self, canvas):
+        super().render(canvas)
+        self.draw_player_border(canvas)
 
     @debug
     def draw_player_border(self, screen):
@@ -141,6 +136,7 @@ class Player(BaseCharacter):
             self.collide_with_walls('y')
             self.limit_max_speed()
             self.fade_speed()
+            self.collide_with_map_border()
 
     def collide_with_walls(self, direction):
         blockers = pygame.sprite.spritecollide(self, self.map_level.blockers, False)

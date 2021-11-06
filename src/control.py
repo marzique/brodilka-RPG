@@ -18,25 +18,24 @@ class Control:
         self.dt: int = 0
         self.fps: int = 144
         self.clock = pygame.time.Clock()
-        self.state: BaseState = state_factory('Dungeon')
-        self.state.game = self
+        self.state: BaseState = state_factory('Dungeon', game=self)
 
-    def main_loop(self):
+    def main_loop(self) -> None:
         while self.running:
             self.dt = self.clock.tick(self.fps) / 1000
             self.process_input()
             self.update()
             self.render()
 
-    def process_input(self):
+    def process_input(self) -> None:
         for event in pygame.event.get():
             if event.type == QUIT:
                 self.running = False
             self.state.process_input(event)
 
-    def update(self):
+    def update(self) -> None:
         self.state.update()
 
-    def render(self):
+    def render(self) -> None:
         self.state.render(self.screen)
         pygame.display.flip()

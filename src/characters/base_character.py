@@ -72,11 +72,11 @@ class BaseCharacter(pygame.sprite.Sprite):
             else:
                 projectile.move()
 
-    def render(self, screen):
-        self.projectiles_render(screen)
+    def render(self, canvas):
+        self.projectiles_render(canvas)
         coords = (self.x, self.y)
-        screen.blit(self.image, coords)
-        self.render_wasd(screen)
+        canvas.blit(self.image, coords)
+        self.render_wasd(canvas)
 
     def projectiles_render(self, screen):
         for projectile in self.projectile_objects:

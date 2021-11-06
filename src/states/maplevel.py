@@ -1,39 +1,42 @@
 import os
 
 import pygame
-from pytmx import load_pygame
+from pygame import Surface
+from pytmx import load_pygame, TiledMap
 
 from src.characters import Player
 from src.constants import TILE_SIZE_PX, TileTypes, WIDTH, HEIGHT, Colors
 from src.core.utils import debug
+from src.gui import GUI
 from src.sprites import Blocker, Tile
 from src.states.base_state import BaseState
 
 
 class MapLevel(BaseState):
     """State that represents game level."""
-    def __init__(self, name):
+    def __init__(self, name, **kwargs):
         super().__init__()
-        self.game = None  # will be set inside Control class
-        self.name = name
-        self.tilemap = self.load_tilemap(name)
+        self.game = kwargs.get('game')
+        self.name: str = name
+        self.tilemap: TiledMap = self.load_tilemap(name)
         self.player = Player('Tester', coords=(50, 150), map_level=self)
         self.all_tiles = pygame.sprite.Group()
         self.blockers = pygame.sprite.Group()
         self.setup_tiles()
-        self.width = self.tilemap.width * TILE_SIZE_PX
-        self.height = self.tilemap.height * TILE_SIZE_PX
+        self.width: int = self.tilemap.width * TILE_SIZE_PX
+        self.height: int = self.tilemap.height * TILE_SIZE_PX
         self.camera = Camera(self.width, self.height)
-        self.canvas = pygame.Surface((self.width, self.height))
+        self.canvas = Surface((self.width, self.height))
+        self.interface = GUI(self.player, self.game.screen)
 
     @staticmethod
-    def load_tilemap(name):
+    def load_tilemap(name: str) -> TiledMap:
         """Load *.tmx map data"""
         path = os.path.join(os.getcwd(), 'data', 'tilesheets', f'{name}.tmx')
         tilemap = load_pygame(path)
         return tilemap
     
-    def setup_tiles(self):
+    def setup_tiles(self) -> None:
         """Create sprite for each tile and store them in groups"""
         blockers = []
         all_tiles = []
@@ -55,6 +58,10 @@ class MapLevel(BaseState):
         self.blockers.update()
         self.player.update()
         self.camera.update(self.player)
+        self.update_player_offset()
+
+    def update_player_offset(self):
+        self.player.offset = self.camera.rect.topleft
 
     def is_blocker(self, x: int, y: int) -> bool:
         """Checks if a tile with these coordinates is a wall or not."""
@@ -70,6 +77,7 @@ class MapLevel(BaseState):
         """Draws everything onto canvas, shifts canvas position to make player centered and draws canvas onto screen."""
         self.render_tilemap(self.canvas)
         self.player.render(self.canvas)
+        self.interface.render(self.canvas)
         self.camera.scroll_canvas(self.canvas)
         screen.blit(self.canvas, self.canvas.get_rect())
 
@@ -89,23 +97,23 @@ class MapLevel(BaseState):
 
 class Camera:
     """Class that implements scrolling map feature that follows Player rect."""
-    def __init__(self, width, height):
-        self.camera = pygame.Rect(0, 0, width, height)
+    def __init__(self, width: int, height: int):
+        self.rect = pygame.Rect(0, 0, width, height)
         self.width = width
         self.height = height
 
-    def scroll_canvas(self, canvas):
+    def scroll_canvas(self, canvas: Surface) -> None:
         """Scroll canvas by offset"""
-        return canvas.scroll(*self.camera.topleft)
+        return canvas.scroll(*self.rect.topleft)
 
-    def update(self, target):
+    def update(self, player: Player) -> None:
         """Calculate offset of the camera."""
-        x = int(WIDTH / 2) - target.rect.x
-        y = int(HEIGHT / 2) - target.rect.y
+        x = int(WIDTH / 2) - player.rect.x
+        y = int(HEIGHT / 2) - player.rect.y
 
         # limit scrolling to map size
         x = min(0, x)  # left
         y = min(0, y)  # top
         x = max(-(self.width - WIDTH), x)  # right
         y = max(-(self.height - HEIGHT), y)  # bottom
-        self.camera = pygame.Rect(x, y, self.width, self.height)
+        self.rect = pygame.Rect(x, y, self.width, self.height)

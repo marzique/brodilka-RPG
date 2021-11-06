@@ -6,41 +6,46 @@ from src.core.utils import add_text
 
 class GUI:
     """Class for Player GUI interface layer."""
-    def __init__(self, player):
+    def __init__(self, player, screen):
         self.player = player
+        self.screen = screen
+        self.screen_rect = screen.get_rect()
         self.height = HEIGHT
         self.width = WIDTH
+        self.x_offset = -self.player.offset[0]
+        self.y_offset = -self.player.offset[1]
 
-    def render(self, screen):
-        self.render_ui(screen)
-        self.render_ammo(screen)
+    def render(self, canvas):
+        self.render_ui(canvas)
+        self.render_ammo(canvas)
 
-    def render_ui(self, screen):
-        x_start = 10
+    def render_ui(self, canvas):
+        x_start = self.x_offset + 10
+        y_start = self.screen_rect.height + self.y_offset - HPMP_THICKNESS
         pygame.draw.line(
-            screen, Colors.BLUE,
-            (x_start, self.height - HPMP_THICKNESS),
-            (x_start + self.player.mp, self.height - HPMP_THICKNESS),
+            canvas, Colors.BLUE,
+            (x_start, y_start - HPMP_THICKNESS),
+            (x_start + self.player.mp, y_start - HPMP_THICKNESS),
             HPMP_THICKNESS
         )
         pygame.draw.line(
-            screen, Colors.RED,
-            (x_start, self.height - HPMP_THICKNESS * 2),
-            (x_start + self.player.hp, self.height - HPMP_THICKNESS * 2),
+            canvas, Colors.RED,
+            (x_start, y_start),
+            (x_start + self.player.hp, y_start),
             HPMP_THICKNESS
         )
         add_text(
-            screen, f"lvl: {self.player.level}",
-            x_start, self.height - 35,
+            canvas, f"lvl: {self.player.level}",
+            x_start, self.screen_rect.height + self.y_offset - 35,
             Fonts.main, 10, Colors.GOLD
         )
 
-    def render_ammo(self, screen):
+    def render_ammo(self, canvas):
         if 10 - self.player.range_shots_limit >= 0:
-            add_text(screen, "Ammo left: " + str(10 - self.player.range_shots_limit), WIDTH * 0.6,
+            add_text(canvas, "Ammo left: " + str(10 - self.player.range_shots_limit), WIDTH * 0.6,
                      HEIGHT - HEIGHT * 0.95, Fonts.main, 14, Colors.GOLD)
         else:
-            add_text(screen, "Ammo left: " + '0', WIDTH * 0.6,
+            add_text(canvas, "Ammo left: " + '0', WIDTH * 0.6,
                      HEIGHT - HEIGHT * 0.95, Fonts.main, 14, Colors.RED)
-            add_text(screen, "RELOADING...", WIDTH * 0.6,
+            add_text(canvas, "RELOADING...", WIDTH * 0.6,
                      HEIGHT - HEIGHT * 0.92, Fonts.regular, 14, Colors.RED)
